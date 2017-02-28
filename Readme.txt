@@ -1,5 +1,4 @@
-INVENTORY - trucks only, basically any
-truck not assigned to a body?
+INVENTORY - trucks only, basically any truck not assigned to a body?
 
 QUEUED
 BUILDING
@@ -22,3 +21,4 @@ tasks:
 ()WASH
 ()INVOICED
 ()CERTIFIED
+
