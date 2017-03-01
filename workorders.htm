@@ -1,4 +1,28 @@
 <HTML>
+<HEAD>
+<script type="text/javascript">
+
+var bOption1 = "SHORT";
+
+function myFunction(myMessage) {
+//    alert(myMessage);
+   if (bOption1 == "SHORT") {
+      //expand it
+      bOption1 = "FULL";
+      document.getElementById("tdlist").innerHTML = "<A href='javascript:myFunction()'>0 of 5 </A><BR>TEST<BR>";
+   }
+   else {
+      //collapse it
+      bOption1 = "SHORT";
+      document.getElementById("tdlist").innerHTML = "<A href='javascript:myFunction()'>0 of 5 </A>";
+   }
+
+  //alert (bOption1);
+
+}
+</script>
+</HEAD>
+
 <style>
 	a:hover {
 		color: #0000FF;
@@ -47,15 +71,19 @@
 <TD>TRADENAME</TD>
 <TD>MODELNO</TD>
 
+<TD> <A href='#' onclick='myFunction("blah");'>0 of 5 </A></TD>
+<TD> <A href='javascript:myFunction("blah")'>0 of 5 </A></TD>
+
 -->
 <table width='100%' border='1'>
 <TR>
-<TD>STATUS</TD> <TD>WO#</TD> <TD>BODYID</TD> <TD>PO#</TD> <TD>CUSTOMER</TD> <TD>ORDERDATE</TD> <TD>REQ DATE</TD> <TD>PROD DATE</TD>
+<TD>STATUS</TD> <TD>WO#</TD> <TD>OPTIONS</TD><TD>BODYID</TD> <TD>PO#</TD> <TD>CUSTOMER</TD> <TD>ORDERDATE</TD> <TD>REQ DATE</TD> <TD>PROD DATE</TD>
 </TR>
 
 <TR>
 <TD> QUEUED </TD>
 <TD> 123 </TD>
+<TD> 0 of 3 </TD>
 <TD> S2341 </TD>
 <TD> 732842 </TD>
 <TD> TOM NEIL </TD>
@@ -65,6 +93,8 @@
 </TR><TR>
 <TD> QUEUED </TD>
 <TD> 456 </TD>
+
+<TD id='tdlist'> <A href='javascript:myFunction()'>0 of 5 </A></TD>
 <TD> S2342 </TD>
 <TD> 732843 </TD>
 <TD> BOB NEIL </TD>
