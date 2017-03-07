@@ -1,4 +1,9 @@
 <HTML>
+<!--
+'workorders.htm 2/22/17 by JRH
+
+-->
+
 <HEAD>
 <script type="text/javascript">
 
@@ -37,12 +42,12 @@ function FlipTask2() {
    if (bTask2 == "SHORT") {
       //expand it
       bTask2 = "FULL";
-      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>0 of 2 </A><BR><TABLE ID='tasklist2'><TR><TD><input type='checkbox' id='task2-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task2-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
+      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>1 of 2 </A><BR><TABLE ID='tasklist2'><TR><TD><input type='checkbox' checked='checked' id='task2-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task2-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
    }
    else {
       //collapse it
       bTask2 = "SHORT";
-      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>0 of 2 </A>";
+      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>1 of 2 </A>";
    }
 
 }
@@ -51,12 +56,12 @@ function FlipTask3() {
    if (bTask3 == "SHORT") {
       //expand it
       bTask3 = "FULL";
-      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>0 of 2 </A><BR><TABLE ID='tasklist3'><TR><TD><input type='checkbox' id='task3-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task3-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
+      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>2 of 2 </A><BR><TABLE ID='tasklist3'><TR><TD><input type='checkbox' checked='checked' id='task3-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task3-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
    }
    else {
       //collapse it
       bTask3 = "SHORT";
-      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>0 of 2 </A>";
+      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>2 of 2 </A>";
    }
 
 }
@@ -65,12 +70,12 @@ function FlipTask4() {
    if (bTask4 == "SHORT") {
       //expand it
       bTask4 = "FULL";
-      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>0 of 2 </A><BR><TABLE ID='tasklist4'><TR><TD><input type='checkbox' id='task4-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task4-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
+      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>2 of 2 </A><BR><TABLE ID='tasklist4'><TR><TD><input type='checkbox' checked='checked' id='task4-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task4-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
    }
    else {
       //collapse it
       bTask4 = "SHORT";
-      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>0 of 2 </A>";
+      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>2 of 2 </A>";
    }
 
 }
@@ -79,12 +84,12 @@ function FlipTask5() {
    if (bTask5 == "SHORT") {
       //expand it
       bTask5 = "FULL";
-      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>0 of 2 </A><BR><TABLE ID='tasklist5'><TR><TD><input type='checkbox' id='task5-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task5-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
+      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>2 of 2 </A><BR><TABLE ID='tasklist5'><TR><TD><input type='checkbox' checked='checked' id='task5-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task5-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
    }
    else {
       //collapse it
       bTask5 = "SHORT";
-      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>0 of 2 </A>";
+      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>2 of 2 </A>";
    }
 
 }
@@ -241,7 +246,7 @@ function FlipOp5() {
 <TR>
 
 <TD> QUEUED </TD>
-<TD> <A href='workorders.asp?id=53245'>53245 </A> </TD>
+<TD> <A href='workorder-detail.asp?id=53245'>53245 </A> </TD>
 <TD id='tasks1'> <A href='javascript:FlipTask1()'>0 of 2 </A></TD>
 <TD id='options1'> <A href='javascript:FlipOp1()'>0 of 2 </A></TD>
 <TD> TOM NEIL </TD>
@@ -252,8 +257,8 @@ function FlipOp5() {
 
 </TR><TR>
 <TD> BUILDING </TD>
-<TD> <A href='workorders.asp?id=123'> 123 </A> </TD>
-<TD id='tasks2'> <A href='javascript:FlipTask2()'>0 of 2 </A></TD>
+<TD> <A href='workorder-detail.asp?id=123'> 123 </A> </TD>
+<TD id='tasks2'> <A href='javascript:FlipTask2()'>1 of 2 </A></TD>
 <TD id='options2'> <A href='javascript:FlipOp2()'>1 of 2 </A></TD>
 <TD> TOM NEIL </TD>
 <TD> 1/1/2017 </TD>
@@ -264,8 +269,8 @@ function FlipOp5() {
 </TR><TR>
 
 <TD> BUILDING </TD>
-<TD> <A href='workorders.asp?id=456'>456 </A> </TD>
-<TD id='tasks3'> <A href='javascript:FlipTask3()'>0 of 2 </A></TD>
+<TD> <A href='workorder-detail.asp?id=456'>456 </A> </TD>
+<TD id='tasks3'> <A href='javascript:FlipTask3()'>2 of 2 </A></TD>
 <TD id='options3'> <A href='javascript:FlipOp3()'>1 of 2 </A></TD>
 <TD> BOB NEIL </TD>
 <TD> 1/2/2017 </TD>
@@ -276,8 +281,8 @@ function FlipOp5() {
 </TR><TR>
 
 <TD> COMPLETED </TD>
-<TD> <A href='workorders.asp?id=2342'> 2342 </A> </TD>
-<TD id='tasks4'> <A href='javascript:FlipTask4()'>0 of 2 </A></TD>
+<TD> <A href='workorder-detail.asp?id=2342'> 2342 </A> </TD>
+<TD id='tasks4'> <A href='javascript:FlipTask4()'>2 of 2 </A></TD>
 <TD id='options4'> <A href='javascript:FlipOp4()'>2 of 2 </A></TD>
 <TD> RICK HENDRICK </TD>
 <TD> 1/2/2017 </TD>
@@ -288,8 +293,8 @@ function FlipOp5() {
 </TR><TR>
 
 <TD> DELIVERED </TD>
-<TD> <A href='workorders.asp?id=9081'>9081 </A> </TD>
-<TD id='tasks5'> <A href='javascript:FlipTask5()'>0 of 2 </A></TD>
+<TD> <A href='workorder-detail.asp?id=9081'>9081 </A> </TD>
+<TD id='tasks5'> <A href='javascript:FlipTask5()'>2 of 2 </A></TD>
 <TD id='options5'> <A href='javascript:FlipOp5()'>2 of 2 </A></TD>
 <TD> DALE EARNHARDT </TD>
 <TD> 1/2/2017 </TD>
@@ -301,5 +306,8 @@ function FlipOp5() {
 
 
 </table>
+<BR>
+<input type='button' value='NEW' id='newbutton'>
+<BR>
 
 </BODY></HTML>
