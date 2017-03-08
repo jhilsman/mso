@@ -12,10 +12,11 @@ End Function
 dim szFromDate, szToDate, szTemp, szSQL
 
 Dim OBJdbConnection
+Dim objRS
 Dim rsSwitches
 Dim iRecordCount, iProcYesCount, iSkipFlag, iEmailAvail, iEmailSent, iCalled, iPendingCount
 Dim iDeclined, iLeftVM, iNotCalled, iRecall, iRetainedCount, iNotRetainedCount, iProcNoCount
-
+Dim strSQL
 
 
 ' *************************************************************************************************
@@ -31,9 +32,9 @@ szFromDate = Request.QueryString("FromDate")
 szToDate = Request.QueryString("ToDate")
 
 
+'<!-- #Include virtual ="/SCRIPTS/ADOVBS.INC" -->
 
 %>
-<!-- #Include virtual ="/SCRIPTS/ADOVBS.INC" -->
 
 <HTML><HEAD><TITLE>Switch-away Worksheet</TITLE>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
@@ -138,7 +139,21 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 'open database connection
 Set OBJdbConnection = Server.CreateObject("ADODB.Connection") 
 OBJdbConnection.mode = 3 ' adModeReadWrite
-OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=\\file01\dpgas\Switch Aways\switchaways.mdb;"
+OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john\desktop\body\mso\mso.mdb;"
+
+Set ObjRs = Server.CreateObject("ADODB.Recordset")
+strSQL = "select * from WO17"
+objRS.open strSQL, OBJdbConnection
+
+Do While Not objRs.EOF
+response.write(objRS("STATUS") & "<br>" & objRS("WO#") & "<br>")
+objRS.MoveNext
+Loop
+
+OBJdbConnection.close
+
+set OBJdbConnection = nothing
+
 
 
 response.write "</body></html>"
