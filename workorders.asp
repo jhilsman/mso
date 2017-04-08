@@ -1,10 +1,82 @@
-<HTML>
-<!--
-'workorders.htm 2/22/17 by JRH
+<%
+' *************************************************************************************************
+'   workorders.asp - 4/7/17 by JRH
+'	lookup all WO in db and display detail
+'
+'		
+'		
+'
+'
+'
+'
+'
+'
+'
+'
+'
+' *************************************************************************************************
 
+
+' *************************************************************************************************
+'    First up, get (some optional, some required) page global vars that come through the query string
+'    ASP functions, vars, and params passed on URL query string
+' *************************************************************************************************
+
+Option Explicit
+response.buffer=true
+Response.Expires = 0
+
+Function IIf(i,j,k)
+    If i Then IIf = j Else IIf = k
+End Function
+
+
+dim szSQL, szParamID, szTasks, szOptions
+dim szFromDate, szToDate
+Dim OBJdbConnection
+Dim objRS, objPkgsRS
+Dim iWOLineCount, iTaskCompleteCount, iTaskCount, iOPtCompleteCount, iOptCount
+
+
+' *************************************************************************************************
+'	Open db connection and get ready to update and/or query
+' *************************************************************************************************
+'open database connection
+Set OBJdbConnection = Server.CreateObject("ADODB.Connection") 
+OBJdbConnection.mode = 3 ' adModeReadWrite
+OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john\desktop\body\mso\mso.mdb;"
+
+Set ObjRs = Server.CreateObject("ADODB.Recordset")
+'szSQL = "select * from WO17 "
+szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 "
+
+objRS.open szSQL, OBJdbConnection
+
+if objRS.EOF then
+   objRS.Close
+   OBJdbConnection.Close
+   set objRS = Nothing
+   set OBJdbConnection = Nothing
+   response.write ("<HTML><BODY bgcolor='ABBDAF'>NO RECORDS FOUND!</BODY></HTML>")
+   response.end
+else
+   objRS.MoveFirst
+end if
+
+
+' *************************************************************************************************
+'    Make a webpage for our guest
+' *************************************************************************************************
+'<!-- #Include virtual ="/SCRIPTS/ADOVBS.INC" -->
+%>
+
+<HTML><HEAD><TITLE>Work Order Summary</TITLE>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<!-- *************************************************************************************************
+	After HTML output page opens, put our javascript here in head
+     *************************************************************************************************
 -->
 
-<HEAD>
 <script type="text/javascript">
 
 var bTask1 = "SHORT";
@@ -24,6 +96,56 @@ function myFunction(myMessage) {
 
 }
 
+<%
+' *************************************************************************************************
+'    Write Java functions for flipping tasks and options
+' *************************************************************************************************
+iWOLineCount = 0
+Do While Not objRs.EOF
+   iWOLineCount = iWOLineCount + 1
+   Set objPkgsRS = Server.CreateObject("ADODB.Recordset")
+   szSQL = "SELECT * FROM PKGS17 where WO_NO = '" & objRS("WO_NO") & "'"
+   objPkgsRS.open szSQL, OBJdbConnection
+   szTasks = ""
+   szOptions = ""
+   iTaskCompleteCount = 0
+   iTaskCount = 0
+   iOptCompleteCount = 0
+   iOptCount = 0
+   do while not objPkgsRS.EOF
+      'gather Tasks
+      if objPkgsRS("STAGE") = 1 then
+         if objPkgsRS("COMPLETED") then iTaskCompleteCount = iTaskCompleteCount + 1
+         iTaskCount = iTaskCount + 1
+      end if
+      'gather options
+      if objPkgsRS("STAGE") = 2 then
+         if objPkgsRS("COMPLETED") then iOptCompleteCount = iOptCompleteCount + 1
+         iOptCount = iOptCount + 1
+      end if
+      objPkgsRS.MoveNext
+   Loop
+   'szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
+   'szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
+
+   'response.write("<tr><td> " & objRS("STATUS_") & "</td><td> " & objRS("WO_NO") & "</td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='Options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
+   response.write ("function FlipTask1() { " & _
+   " if (bTask1 == ""SHORT"") { " & _
+      " bTask1 = ""FULL""; " & _
+      " document.getElementById(""tasks1"").innerHTML = ""<A href='javascript:FlipTask1()'>0 of 2 </A><BR><TABLE ID='tasklist1'><TR><TD><input type='checkbox' id='task1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>""; " & _
+   " }   else { " & _
+   "  bTask1 = ""SHORT""; " & _
+   "  document.getElementById(""tasks1"").innerHTML = ""<A href='javascript:FlipTask1()'>0 of 2 </A>""; } } ") 
+
+   objRS.MoveNext
+   objPkgsRS.Close
+   set objPkgsRS = Nothing
+  
+Loop
+
+
+%>
+
 function FlipTask1() {
    if (bTask1 == "SHORT") {
       //expand it
@@ -34,6 +156,20 @@ function FlipTask1() {
       //collapse it
       bTask1 = "SHORT";
       document.getElementById("tasks1").innerHTML = "<A href='javascript:FlipTask1()'>0 of 2 </A>";
+   }
+
+}
+
+function FlipOp1() {
+   if (bOption1 == "SHORT") {
+      //expand it
+      bOption1 = "FULL";
+      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A><BR><TABLE ID='optionslist1'><TR><TD><input type='checkbox' id='option1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='option1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
+   }
+   else {
+      //collapse it
+      bOption1 = "SHORT";
+      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A>";
    }
 
 }
@@ -94,19 +230,6 @@ function FlipTask5() {
 
 }
 
-function FlipOp1() {
-   if (bOption1 == "SHORT") {
-      //expand it
-      bOption1 = "FULL";
-      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A><BR><TABLE ID='optionslist1'><TR><TD><input type='checkbox' id='option1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='option1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption1 = "SHORT";
-      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A>";
-   }
-
-}
 
 function FlipOp2() {
    if (bOption2 == "SHORT") {
@@ -243,6 +366,60 @@ function FlipOp5() {
 <TD>VIN #</TD>
 </TR>
 
+<%
+' *********************************************
+'  DISPLAY RECORDS FROM DATABASE
+' *********************************************
+objRS.MoveFirst
+iWOLineCount = 0
+Do While Not objRs.EOF
+   iWOLineCount = iWOLineCount + 1
+   ' do lookup on PKGS17 for PKGS17.WO_NO = WO17.WO_NO, display sum as link:
+   '<A href='javascript:FlipTask1()'>0 of 2 </A>
+   '<A href='javascript:FlipOp1()'>0 of 2 </A>
+   Set objPkgsRS = Server.CreateObject("ADODB.Recordset")
+   szSQL = "SELECT * FROM PKGS17 where WO_NO = '" & objRS("WO_NO") & "'"
+   'response.write szSQL
+   objPkgsRS.open szSQL, OBJdbConnection
+   szTasks = ""
+   szOptions = ""
+   iTaskCompleteCount = 0
+   iTaskCount = 0
+   iOptCompleteCount = 0
+   iOptCount = 0
+   do while not objPkgsRS.EOF
+      'gather Tasks
+      if objPkgsRS("STAGE") = 1 then
+         if objPkgsRS("COMPLETED") then iTaskCompleteCount = iTaskCompleteCount + 1
+         iTaskCount = iTaskCount + 1
+      end if
+      'gather options
+      if objPkgsRS("STAGE") = 2 then
+         if objPkgsRS("COMPLETED") then iOptCompleteCount = iOptCompleteCount + 1
+         iOptCount = iOptCount + 1
+      end if
+      objPkgsRS.MoveNext
+   Loop
+   szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
+   szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
+
+   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> " & objRS("WO_NO") & "</td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='Options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
+   objRS.MoveNext
+   objPkgsRS.Close
+   set objPkgsRS = Nothing
+  
+Loop
+
+   objRS.Close
+   OBJdbConnection.Close
+   set objRS = Nothing
+   set OBJdbConnection = Nothing
+
+
+%>
+
+
+<!-- REST OF TABLE IS DUMMY 
 <TR>
 
 <TD> QUEUED </TD>
@@ -304,6 +481,7 @@ function FlipOp5() {
 
 </TR>
 
+END DUMMY TABLE DATA -->
 
 </table>
 <BR>

@@ -189,7 +189,49 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 </style>
 
 
-</HEAD><BODY BGCOLOR=abbdAf>
+</HEAD>
+<style>
+	a:hover {
+		color: #0000FF;
+		text-transform:	uppercase;
+		font-weight: bold;
+		}
+	
+	body {
+		background-color: #ABBDAF;
+		}
+
+	.Center {
+		text-align: center;
+		}
+
+	.CenterBold {
+		text-align: center;
+		font-weight: bold;
+		}
+
+	.CenterItalicBold {
+		text-align: center;
+		font-weight: bold;
+		font-style: italic;
+		}
+
+	.CenterBoldLarge {
+		text-align: center;
+		font-weight: bold;
+		font-size: 150%;
+		}
+
+	#title {
+		font-size: 200%;
+		}
+
+        td {
+                text-align: center;
+           }
+</style>
+
+<BODY>
 <!-- *************************************************************************************************
 	Start HTML BODY
      *************************************************************************************************
@@ -251,17 +293,20 @@ objRS.open szSQL, OBJdbConnection
 '	List row, close db
 ' *************************************************************************************************
 Do While Not objRs.EOF
-response.write("<tr><td> <input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_") & "</td><td> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td><td>" & "tasks" & "</td><td>" & "options" & "</td><td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> </td><td> <input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> </td><td> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td></tr>")
-response.write("<TR><TD>BODY ID</TD> <TD>PO#</TD> <TD>BODYSTYLE</TD> <TD>LENGTH</TD> <TD>BODY WEIGHT</TD> <TD>INV DATE</TD> <TD>INV #</TD> <TD>BODYYEAR</TD><TD>MODEL #</TD></TR> ")
-response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td><td><input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'></td><td><input type='input' size='12' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td><td><input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'></td><td><input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'></td><td><input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'></td><td><input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'></td><td><input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'></td><td><input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'></td></tr>")
-response.write("<TR><TD>TRADENAME</TD></TR> ")
-response.write("<tr><td><input type='input' size='10' id='tradename' name='tradename' value='" & objRS("TRADENAME") & "'></td></tr>")
 
-objRS.MoveNext
+response.write("<tr><td> <input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_") & "</td><td> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td><td>" & "tasks" & "</td><td>" & "options" & "</td><td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> </td><td> <input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> </td><td> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td></tr>") 
+   response.write("<TR><TD>BODY ID</TD> <TD>PO#</TD> <TD>BODYSTYLE</TD> <TD>LENGTH</TD> <TD>BODY WEIGHT</TD> <TD>INV DATE</TD> <TD>INV #</TD> <TD>BODYYEAR</TD><TD>MODEL #</TD></TR> ")
+   response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td><td><input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'></td><td><input type='input' size='12' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td><td><input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'></td><td><input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'></td><td><input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'></td><td><input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'></td><td><input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'></td><td><input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'></td></tr>")
+   response.write("<TR><TD>TRADENAME</TD></TR> ")
+   response.write("<tr><td><input type='input' size='10' id='tradename' name='tradename' value='" & objRS("TRADENAME") & "'></td></tr>")
+
+   objRS.MoveNext
 Loop
 
 
 
+objRS.Close
+set objRS = Nothing
 OBJdbConnection.close
 set OBJdbConnection = nothing
 
