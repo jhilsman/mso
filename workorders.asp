@@ -36,7 +36,10 @@ dim szFromDate, szToDate
 Dim OBJdbConnection
 Dim objRS, objPkgsRS
 Dim iWOLineCount, iTaskCompleteCount, iTaskCount, iOPtCompleteCount, iOptCount
+Dim szSortParam
 
+szSortParam = Request.QueryString("ORDER")
+if Len(szSortParam) < 2 then szSortParam = "ORDER_DATE"
 
 ' *************************************************************************************************
 '	Open db connection and get ready to update and/or query
@@ -48,7 +51,7 @@ OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john
 
 Set ObjRs = Server.CreateObject("ADODB.Recordset")
 'szSQL = "select * from WO17 "
-szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 "
+szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 WHERE STATUS <> '4' ORDER BY " & szSortParam
 
 objRS.open szSQL, OBJdbConnection
 
@@ -79,17 +82,15 @@ end if
 
 <script type="text/javascript">
 
-var bTask1 = "SHORT";
-var bTask2 = "SHORT";
-var bTask3 = "SHORT";
-var bTask4 = "SHORT";
-var bTask5 = "SHORT";
-
-var bOption1 = "SHORT";
-var bOption2 = "SHORT";
-var bOption3 = "SHORT";
-var bOption4 = "SHORT";
-var bOption5 = "SHORT";
+//THIS LIMITS THE ROWS OF WO THAT CAN BE DISPLAYED - JAVA WILL CRASH IF TRY TO DYNAMICALLY SET TASKS/OPTIONS BEYOND THE LIMITS OF AVAIL VARS!
+<%
+iWOLineCount = 0
+do while iWOLineCount < 50
+   response.write("var bTask" & iWOLineCount & " = ""SHORT"";"  )
+   response.write("var bOption" & iWOLineCount & " = ""SHORT"";" & vbCRLF)
+   iWOLineCount = iWOLineCount + 1
+loop
+%>
 
 function myFunction(myMessage) {
    alert(myMessage);
@@ -115,27 +116,46 @@ Do While Not objRs.EOF
    do while not objPkgsRS.EOF
       'gather Tasks
       if objPkgsRS("STAGE") = 1 then
-         if objPkgsRS("COMPLETED") then iTaskCompleteCount = iTaskCompleteCount + 1
+         if objPkgsRS("COMPLETED") then 
+	    iTaskCompleteCount = iTaskCompleteCount + 1
+            szTasks = szTasks & "<TR> <TD> <input type='checkbox' disabled='disabled' checked='checked' id='task" & iWOLineCount & "-" & iTaskCount & "'> </TD> <TD> " & objPkgsRS("NAME") & " </TD> </TR> "
+         else
+            szTasks = szTasks & "<TR> <TD> <input type='checkbox' disabled='disabled' id='task" & iWOLineCount & "-" & iTaskCount & "'> </TD> <TD> " & objPkgsRS("NAME") & "</TD> </TR>"
+         end if
          iTaskCount = iTaskCount + 1
       end if
       'gather options
       if objPkgsRS("STAGE") = 2 then
-         if objPkgsRS("COMPLETED") then iOptCompleteCount = iOptCompleteCount + 1
+         if objPkgsRS("COMPLETED") then 
+	    iOptCompleteCount = iOptCompleteCount + 1
+            szOptions = szOptions & "<TR> <TD> <input type='checkbox' disabled='disabled' checked='checked' id='option" & iWOLineCount & "-" & iOptCount & "'> </TD> <TD> " & objPkgsRS("NAME") & " </TD> </TR> " 
+         else
+            szOptions = szOptions & "<TR> <TD> <input type='checkbox' disabled='disabled' id='option" & iWOLineCount & "-" & iOptCount & "'> </TD> <TD> " & objPkgsRS("NAME") & " </TD> </TR> " 
+         end if
          iOptCount = iOptCount + 1
       end if
       objPkgsRS.MoveNext
    Loop
-   'szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
-   'szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
 
-   'response.write("<tr><td> " & objRS("STATUS_") & "</td><td> " & objRS("WO_NO") & "</td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='Options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
-   response.write ("function FlipTask1() { " & _
-   " if (bTask1 == ""SHORT"") { " & _
-      " bTask1 = ""FULL""; " & _
-      " document.getElementById(""tasks1"").innerHTML = ""<A href='javascript:FlipTask1()'>0 of 2 </A><BR><TABLE ID='tasklist1'><TR><TD><input type='checkbox' id='task1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>""; " & _
+
+   'FLIPTASK () for this WO
+   response.write (vbCRLF & vbCRLF & "function FlipTask" & iWOLineCount & "() { " & _
+   " if (bTask" & iWOLineCount & " == ""SHORT"") { " & _
+      " bTask" & iWOLineCount & " = ""FULL""; " & _
+      " document.getElementById(""tasks" & iWOLineCount & """).innerHTML = ""<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount & " </A><BR><TABLE ID='tasklist" & iWOLineCount & "'>" & szTasks & "</TABLE><BR>""; " & _
    " }   else { " & _
-   "  bTask1 = ""SHORT""; " & _
-   "  document.getElementById(""tasks1"").innerHTML = ""<A href='javascript:FlipTask1()'>0 of 2 </A>""; } } ") 
+   "  bTask" & iWOLineCount & " = ""SHORT""; " & _
+   "  document.getElementById(""tasks" & iWOLineCount & """).innerHTML = ""<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount & " </A>""; } } ") 
+
+   'FLIPOPT() for this WO
+   response.write (vbCRLF & vbCRLF & "function FlipOp" & iWOLineCount & "() { " & _
+   " if (bOption" & iWOLineCount & " == ""SHORT"") { " & _
+      " bOption" & iWOLineCount & " = ""FULL""; " & _
+      " document.getElementById(""options" & iWOLineCount & """).innerHTML = ""<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount & " </A><BR><TABLE ID='optionslist" & iWOLineCount & "'>" &  szOptions & "</TABLE><BR>""; " & _
+   " }   else { " & _
+   "  bOption" & iWOLineCount & " = ""SHORT""; " & _
+   "  document.getElementById(""options" & iWOLineCount & """).innerHTML = ""<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount & " </A>""; } } " ) 
+
 
    objRS.MoveNext
    objPkgsRS.Close
@@ -145,146 +165,6 @@ Loop
 
 
 %>
-
-function FlipTask1() {
-   if (bTask1 == "SHORT") {
-      //expand it
-      bTask1 = "FULL";
-      document.getElementById("tasks1").innerHTML = "<A href='javascript:FlipTask1()'>0 of 2 </A><BR><TABLE ID='tasklist1'><TR><TD><input type='checkbox' id='task1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bTask1 = "SHORT";
-      document.getElementById("tasks1").innerHTML = "<A href='javascript:FlipTask1()'>0 of 2 </A>";
-   }
-
-}
-
-function FlipOp1() {
-   if (bOption1 == "SHORT") {
-      //expand it
-      bOption1 = "FULL";
-      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A><BR><TABLE ID='optionslist1'><TR><TD><input type='checkbox' id='option1-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='option1-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption1 = "SHORT";
-      document.getElementById("options1").innerHTML = "<A href='javascript:FlipOp1()'>0 of 2 </A>";
-   }
-
-}
-
-function FlipTask2() {
-   if (bTask2 == "SHORT") {
-      //expand it
-      bTask2 = "FULL";
-      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>1 of 2 </A><BR><TABLE ID='tasklist2'><TR><TD><input type='checkbox' checked='checked' id='task2-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' id='task2-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bTask2 = "SHORT";
-      document.getElementById("tasks2").innerHTML = "<A href='javascript:FlipTask2()'>1 of 2 </A>";
-   }
-
-}
-
-function FlipTask3() {
-   if (bTask3 == "SHORT") {
-      //expand it
-      bTask3 = "FULL";
-      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>2 of 2 </A><BR><TABLE ID='tasklist3'><TR><TD><input type='checkbox' checked='checked' id='task3-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task3-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bTask3 = "SHORT";
-      document.getElementById("tasks3").innerHTML = "<A href='javascript:FlipTask3()'>2 of 2 </A>";
-   }
-
-}
-
-function FlipTask4() {
-   if (bTask4 == "SHORT") {
-      //expand it
-      bTask4 = "FULL";
-      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>2 of 2 </A><BR><TABLE ID='tasklist4'><TR><TD><input type='checkbox' checked='checked' id='task4-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task4-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bTask4 = "SHORT";
-      document.getElementById("tasks4").innerHTML = "<A href='javascript:FlipTask4()'>2 of 2 </A>";
-   }
-
-}
-
-function FlipTask5() {
-   if (bTask5 == "SHORT") {
-      //expand it
-      bTask5 = "FULL";
-      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>2 of 2 </A><BR><TABLE ID='tasklist5'><TR><TD><input type='checkbox' checked='checked' id='task5-1'></TD> <TD>PTO System</TD> </TR><TR> <TD><input type='checkbox' checked='checked' id='task5-2' ></TD> <TD>Sunroof</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bTask5 = "SHORT";
-      document.getElementById("tasks5").innerHTML = "<A href='javascript:FlipTask5()'>2 of 2 </A>";
-   }
-
-}
-
-
-function FlipOp2() {
-   if (bOption2 == "SHORT") {
-      //expand it
-      bOption2 = "FULL";
-      document.getElementById("options2").innerHTML = "<A href='javascript:FlipOp2()'>1 of 2 </A><BR><TABLE ID='optionslist2'><TR><TD><input type='checkbox' id='option2-1' checked='checked'></TD> <TD>CD Player</TD></TR><TR><TD><input type='checkbox' id='option2-2'></TD><TD>Tinted Windows</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption2 = "SHORT";
-      document.getElementById("options2").innerHTML = "<A href='javascript:FlipOp2()'>1 of 2 </A>";
-   }
-
-}
-
-function FlipOp3() {
-   if (bOption3 == "SHORT") {
-      //expand it
-      bOption3 = "FULL";
-      document.getElementById("options3").innerHTML = "<A href='javascript:FlipOp3()'>1 of 2 </A><BR><TABLE ID='optionslist3'><TR><TD><input type='checkbox' id='option3-1' checked='checked'></TD> <TD>Power Windows</TD></TR><TR><TD><input type='checkbox' id='option3-2'></TD> <TD>Stretch 17.25 inches</TD></TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption3 = "SHORT";
-      document.getElementById("options3").innerHTML = "<A href='javascript:FlipOp3()'>1 of 2 </A>";
-   }
-
-}
-
-function FlipOp4() {
-   if (bOption4 == "SHORT") {
-      //expand it
-      bOption4 = "FULL";
-      document.getElementById("options4").innerHTML = "<A href='javascript:FlipOp4()'>2 of 2 </A><BR><TABLE ID='optionslist4'><TR><TD><input type='checkbox' id='option4-1' checked='checked'></TD> <TD>Dovetail</TD></TR><TR><TD><input type='checkbox' checked='checked' id='option4-2'></TD> <TD>Sleeper</TD> </TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption4 = "SHORT";
-      document.getElementById("options4").innerHTML = "<A href='javascript:FlipOp4()'>2 of 2 </A>";
-   }
-
-}
-function FlipOp5() {
-   if (bOption5 == "SHORT") {
-      //expand it
-      bOption5 = "FULL";
-      document.getElementById("options5").innerHTML = "<A href='javascript:FlipOp5()'>2 of 2 </A><BR><TABLE ID='optionslist5'><TR><TD><input type='checkbox' id='option5-1' checked='checked'></TD> <TD>CB Radio</TD></TR><TR><TD><input type='checkbox' checked='checked' id='option5-2'></TD> <TD>Television</TD> </TR></TABLE><BR>";
-   }
-   else {
-      //collapse it
-      bOption5 = "SHORT";
-      document.getElementById("options5").innerHTML = "<A href='javascript:FlipOp5()'>2 of 2 </A>";
-   }
-
-}
 
 
 
@@ -332,38 +212,24 @@ function FlipOp5() {
            }
 </style>
 <BODY >
-<!-- 
-<TD>BODYSTYLE</TD>
-<TD>LENGTH</TD>
-<TD>BODYWEIGHT</TD>
-<TD>PKGS</TD>
-<TD>INVOICEDATE</TD>
-<TD>INVNUM</TD>
-<TD>BODYYEAR</TD>
-<TD>TRADENAME</TD>
-<TD>MODELNO</TD>
 
-<TD> <A href='#' onclick='myFunction("blah");'>0 of 5 </A></TD>
-<TD> <A href='javascript:myFunction("blah")'>0 of 5 </A></TD>
-
--->
 <table width='100%' border='1' id='wolist'>
 <TR>
-<TD>STATUS<BR><select id="STATUSSELECTION">
+<TD><A href='workorders.asp?order=STATUS'>STATUS</A> <BR><select id="STATUSSELECTION">
   <option selected="SELECTED" value="ALL">ALL</option>
   <option value="QUEUED">QUEUED</option>
   <option value="BUILDING">BUILDING</option>
   <option value="COMPLETED">COMPLETED</option>
   <option value="DELIVERED">DELIVERED</option>
 </select></TD> 
-<TD>WORK ORDER #<BR><INPUT type='textbox' size='8' id='wosearch'><input type='button' value='S' id='wosearchbutton'></TD> 
+<TD><A href='workorders.asp?order=WO_NO'>WORK ORDER #<A> <BR><INPUT type='textbox' size='8' id='wosearch'><input type='button' value='S' id='wosearchbutton'></TD> 
 <TD>TASKS</TD>
 <TD>OPTIONS</TD> 
-<TD>CUSTOMER <BR><INPUT type='textbox' size='8' id='custsearch'><input type='button' value='S' id='custsearchbutton'></TD> 
-<TD>ORDER DATE</TD> 
-<TD>REQ DATE</TD> 
-<TD>PROD DATE</TD>
-<TD>VIN #</TD>
+<TD><A href='workorders.asp?order=CUSTOMER'>CUSTOMER</A> <BR><INPUT type='textbox' size='8' id='custsearch'><input type='button' value='S' id='custsearchbutton'></TD> 
+<TD><A href='workorders.asp?order=ORDER_DATE'>ORDER DATE</A> </TD> 
+<TD><A href='workorders.asp?order=REQ_DATE'>REQ DATE</A> </TD> 
+<TD><A href='workorders.asp?order=PRODUCTIONSTART_DATE'>PROD DATE</TD>
+<TD><A href='workorders.asp?order=VIN'>VIN #</A> </TD>
 </TR>
 
 <%
@@ -403,7 +269,7 @@ Do While Not objRs.EOF
    szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
    szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
 
-   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> " & objRS("WO_NO") & "</td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='Options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
+   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
    objRS.MoveNext
    objPkgsRS.Close
    set objPkgsRS = Nothing
@@ -418,70 +284,6 @@ Loop
 
 %>
 
-
-<!-- REST OF TABLE IS DUMMY 
-<TR>
-
-<TD> QUEUED </TD>
-<TD> <A href='workorder-detail.asp?id=53245'>53245 </A> </TD>
-<TD id='tasks1'> <A href='javascript:FlipTask1()'>0 of 2 </A></TD>
-<TD id='options1'> <A href='javascript:FlipOp1()'>0 of 2 </A></TD>
-<TD> TOM NEIL </TD>
-<TD> 1/1/2017 </TD>
-<TD> 2/1/2017 </TD>
-<TD>  </TD>
-<TD>  </TD>
-
-</TR><TR>
-<TD> BUILDING </TD>
-<TD> <A href='workorder-detail.asp?id=123'> 123 </A> </TD>
-<TD id='tasks2'> <A href='javascript:FlipTask2()'>1 of 2 </A></TD>
-<TD id='options2'> <A href='javascript:FlipOp2()'>1 of 2 </A></TD>
-<TD> TOM NEIL </TD>
-<TD> 1/1/2017 </TD>
-<TD> 2/1/2017 </TD>
-<TD> 1/14/2017 </TD>
-<TD>  </TD>
-
-</TR><TR>
-
-<TD> BUILDING </TD>
-<TD> <A href='workorder-detail.asp?id=456'>456 </A> </TD>
-<TD id='tasks3'> <A href='javascript:FlipTask3()'>2 of 2 </A></TD>
-<TD id='options3'> <A href='javascript:FlipOp3()'>1 of 2 </A></TD>
-<TD> BOB NEIL </TD>
-<TD> 1/2/2017 </TD>
-<TD> 2/2/2017 </TD>
-<TD> 1/15/2017 </TD>
-<TD> <A HREF='trucks.asp?vin=23075207598207490'> 23075207598207490 </A></TD>
-
-</TR><TR>
-
-<TD> COMPLETED </TD>
-<TD> <A href='workorder-detail.asp?id=2342'> 2342 </A> </TD>
-<TD id='tasks4'> <A href='javascript:FlipTask4()'>2 of 2 </A></TD>
-<TD id='options4'> <A href='javascript:FlipOp4()'>2 of 2 </A></TD>
-<TD> RICK HENDRICK </TD>
-<TD> 1/2/2017 </TD>
-<TD> 2/2/2017 </TD>
-<TD> 1/15/2017 </TD>
-<TD> <A HREF='trucks.asp?vin=23075207598207490'> 23075207598207490 </A></TD>
-
-</TR><TR>
-
-<TD> DELIVERED </TD>
-<TD> <A href='workorder-detail.asp?id=9081'>9081 </A> </TD>
-<TD id='tasks5'> <A href='javascript:FlipTask5()'>2 of 2 </A></TD>
-<TD id='options5'> <A href='javascript:FlipOp5()'>2 of 2 </A></TD>
-<TD> DALE EARNHARDT </TD>
-<TD> 1/2/2017 </TD>
-<TD> 2/2/2017 </TD>
-<TD> 1/15/2017 </TD>
-<TD> <A HREF='trucks.asp?vin=23075207598207490'> 23075207598207490 </A></TD>
-
-</TR>
-
-END DUMMY TABLE DATA -->
 
 </table>
 <BR>
