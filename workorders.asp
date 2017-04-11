@@ -1,7 +1,7 @@
 <%
 ' *************************************************************************************************
 '   workorders.asp - 4/7/17 by JRH
-'	lookup all WO in db and display detail
+'	lookup all (or filtered) WO in db and display each in a <TR>
 '
 '		
 '		
@@ -216,7 +216,7 @@ Loop
 <table width='100%' border='1' id='wolist'>
 <TR>
 <TD><A href='workorders.asp?order=STATUS'>STATUS</A> <BR><select id="STATUSSELECTION">
-  <option selected="SELECTED" value="ALL">ALL</option>
+  <option selected="SELECTED" value="NOT DELIVERED">NOT DELIVERED</option>
   <option value="QUEUED">QUEUED</option>
   <option value="BUILDING">BUILDING</option>
   <option value="COMPLETED">COMPLETED</option>

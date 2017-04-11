@@ -45,6 +45,32 @@ Dim objRS
 'szFromDate = Request.QueryString("FromDate")
 'szToDate = Request.QueryString("ToDate")
 szParamID = Request.QueryString("ID")
+szParamID = Request.Form("WO_NO")
+
+'select record
+'edit
+'update
+'close
+
+'<select id='STATUSSELECTION'> <option selected='SELECTED' value='ALL'>ALL</option> <option value='QUEUED'>QUEUED</option> <option value='BUILDING'>BUILDING</option> <option value='COMPLETED'>COMPLETED</option> <option value='DELIVERED'>DELIVERED</option> </select> 
+'<input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_")
+'<input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'>
+'<input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> 
+'<input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> 
+'<input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> 
+'<input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> 
+'<input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'>
+'<input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>
+'<input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'>
+'<input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'>
+'<input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'>
+'<input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'>
+'<input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'>
+'<input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'>
+'<input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'>
+'<input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'>
+
+
 
 
 
@@ -66,6 +92,7 @@ szParamID = Request.QueryString("ID")
 function onUpdateWO()
 {
 
+   alert ('Ha');
    //validate data, alert error or
     document.getElementById('wo-detail').submit();
 
