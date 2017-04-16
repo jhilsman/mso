@@ -31,6 +31,9 @@ Function IIf(i,j,k)
     If i Then IIf = j Else IIf = k
 End Function
 
+Const adOpenStatic = 3
+Const adLockOptimistic = 3
+Const adUseClient = 3
 
 dim szSQL, szParamID
 dim szFromDate, szToDate
@@ -45,30 +48,7 @@ Dim objRS
 'szFromDate = Request.QueryString("FromDate")
 'szToDate = Request.QueryString("ToDate")
 szParamID = Request.QueryString("ID")
-szParamID = Request.Form("WO_NO")
-
-'select record
-'edit
-'update
-'close
-
-'<select id='STATUSSELECTION'> <option selected='SELECTED' value='ALL'>ALL</option> <option value='QUEUED'>QUEUED</option> <option value='BUILDING'>BUILDING</option> <option value='COMPLETED'>COMPLETED</option> <option value='DELIVERED'>DELIVERED</option> </select> 
-'<input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_")
-'<input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'>
-'<input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> 
-'<input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> 
-'<input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> 
-'<input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> 
-'<input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'>
-'<input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>
-'<input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'>
-'<input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'>
-'<input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'>
-'<input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'>
-'<input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'>
-'<input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'>
-'<input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'>
-'<input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'>
+szParamID = Request.Form("WO_NO_OLD")
 
 
 
@@ -281,30 +261,19 @@ if szParamID = "" then
    response.write ("EMPTY ID! Creating?<BR>")
    'display new form?
    response.end
-   szSQL = "select * from WO17"
 else
    response.write ("ID = '" & szParamID & "'<BR>")
-   szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 where WO_NO ='" & szParamID & "'"
+   szSQL = "select * from WO17 where WO_NO ='" & szParamID & "'"
 end if
-'response.write ( szSQL & "<br>")
-response.write ("<FORM name='wo-detail' id='wo-detail' action='workorder-detail-update.asp' method='post'>")
+response.write ( szSQL & "<br>")
+
+
 %>
 
 <!-- *************************************************************************************************
 	Main WO Table and header
      *************************************************************************************************
 -->
-<table width='100%' border='1' id='wolist'>
-<TR>
-<TD>STATUS</TD> 
-<TD>WO #</TD> 
-<TD>CUSTOMER </TD> 
-<TD>ORDER DATE</TD> 
-<TD>REQ DATE</TD> 
-<TD>PROD DATE</TD>
-<TD>PO#</TD> 
-<TD>VIN #</TD>
-</TR>
 
 <%
 ' *************************************************************************************************
@@ -317,33 +286,71 @@ OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john
 
 Set ObjRs = Server.CreateObject("ADODB.Recordset")
 
-objRS.open szSQL, OBJdbConnection
+objRS.open szSQL, OBJdbConnection, adOpenStatic, adLockOptimistic
+
 
 ' *************************************************************************************************
-'	List row, close db
+'	UPDATE RECORD
 ' *************************************************************************************************
-Do While Not objRs.EOF
+'response.write (Request.Form("statusselection"))
+'lookup 'queued' 'building' etc to get value for status
+objRs("status") = Request.Form("status")
 
-response.write("<tr><td> <BR><select id='STATUSSELECTION'> <option selected='SELECTED' value='ALL'>ALL</option> <option value='QUEUED'>QUEUED</option> <option value='BUILDING'>BUILDING</option> <option value='COMPLETED'>COMPLETED</option> <option value='DELIVERED'>DELIVERED</option> </select> <BR> <input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_") & "</td><td> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td><td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> </td><td> <input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> </td> <td><input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'></td> <td> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td></tr>") 
-   response.write("<TR><TD>BODY ID</TD> <TD>MODEL #</TD> <TD>INV DATE</TD> <TD>INV #</TD> <TD>LENGTH</TD> <TD>BODY WEIGHT</TD> <TD>BODYYEAR</TD> <TD>BODYSTYLE</TD> </TR> ")
-   response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td> <td><input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'></td> <td><input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'></td><td><input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'></td> <td><input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'></td><td><input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'></td> <td><input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'></td> <td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td> </tr>")
+objRs("wo_no") = Request.Form("wo_no")
+objRs("customer") = Request.Form("customer")
+objRs("po_no") = Request.Form("po_no")
+objRs("vin") = Request.Form("vin")
+objRs("bodyid") = Request.Form("bodyid")
+objRs("model_no") = Request.Form("model_no")
+objRs("inv_no") = Request.Form("inv_no")
+objRs("length") = Request.Form("length")
+objRs("body_weight") = Request.Form("body_weight")
+objRs("body_year") = Request.Form("body_year")
+objRs("bodystyle") = Request.Form("bodystyle")
 
-   objRS.MoveNext
-Loop
+'set or clear dates
+if Request.Form("order_date") <> "" then 
+   objRs("order_date") = Request.Form("order_date")
+else
+   objRs("order_date") = Null
+end if
+if Request.Form("req_date") <> "" then 
+   objRs("req_date") = Request.Form("req_date")
+else
+   objRs("req_date") = Null
+end if
+if Request.Form("productionstart_date") <> "" then 
+   objRs("productionstart_date") = Request.Form("productionstart_date")
+else
+   objRs("productionstart_date") = Null
+end if
+if Request.Form("invoice_date") <> "" then 
+   objRs("invoice_date") = Request.Form("invoice_date")
+else
+   objRs("invoice_date") = Null
+end if
 
-
-
+objRs.Update
 objRS.Close
 set objRS = Nothing
-OBJdbConnection.close
-set OBJdbConnection = nothing
 
 ' *************************************************************************************************
-'	End MAIN WO table and form
+'	Update PKGS17 if we changed the WO#
 ' *************************************************************************************************
-response.write "</table>"
-response.write "<div align='right'><input type='button' name='cancel' id='cancel' value='Cancel' onclick='onCancel();'> &nbsp; &nbsp; <input type='button' name='update' id='update' value='Update' onclick='onUpdateWO();'></div>"
-response.write "</form>"
+if szParamID <> request.form("wo_no") then
+   szSQL = "UPDATE PKGS17 SET WO_NO = '" & request.form("WO_NO") & "' WHERE WO_NO = '" & szParamID & "'"
+   'update pkgs.wo to request.form("wo_no") where pkgs.wo = szParamID
+   response.write ("<BR>" & szSQL & "<BR>")
+   OBJdbConnection.Execute szSQL
+end if
+
+response.write("Record Updated")
+
+response.write("<BR><A href='workorders.asp'>Continue</A>")
+
+
+OBJdbConnection.close
+set OBJdbConnection = nothing
 
 
 ' *************************************************************************************************
