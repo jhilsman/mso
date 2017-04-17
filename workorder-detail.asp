@@ -153,6 +153,48 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 
 }
 
+        var NumOfRow = 1;
+    
+        function Button1_onclick(){
+            NumOfRow++;
+            // get the refference of the main Div
+            var mainDiv = document.getElementById('MainDiv');
+            
+            // create new div that will work as a container
+            var newDiv = document.createElement('div');
+            newDiv.setAttribute('id','innerDiv'+NumOfRow);
+            
+            //create span to contain the text
+            var newSpan = document.createElement('span');
+            newSpan.innerHTML = "Enter Your Mail Address ";
+            
+            // create new textbox for email entry
+            var newTextBox = document.createElement('input');
+            newTextBox.type = 'text';
+            newTextBox.setAttribute('id','txtAddr'+NumOfRow);
+            
+            // create remove button for each email adress
+            var newButton = document.createElement('input');
+            newButton.type = 'button';
+            newButton.value = 'Remove';
+            newButton.id = 'btn'+NumOfRow;
+            
+            // atach event for remove button click
+            newButton.onclick = function RemoveEntry() { 
+                var mainDiv = document.getElementById('MainDiv');
+                mainDiv.removeChild(this.parentNode);
+            }
+            
+            // append the span, textbox and the button
+            newDiv.appendChild(newSpan);
+            newDiv.appendChild(newTextBox);
+            newDiv.appendChild(newButton);
+            
+            // finally append the new div to the main div
+            mainDiv.appendChild(newDiv);
+    
+        }
+
 </script>
 
 <!-- *************************************************************************************************
@@ -304,17 +346,53 @@ response.write("<tr><td> <BR><select id='STATUSSELECTION' name='statusselection'
    objRS.MoveNext
 Loop
 
+' *************************************************************************************************
+'	End WO item detail, show tasks and options
+' *************************************************************************************************
+response.write "</table>"
+
+'Enter Your Mail Address <input id="txtAddr1" type="text" />
+'<input id="Button1" type="button" value="Add More" onclick="Button1_onclick()" />
 
 
+response.write ("<table width='100%' border='1' id='wolist'> <TR> <TD align='center'>TASKS</TD> <TD align='center'>OPTIONS</TD> </TR>")
+objRS.Close
+szSQL = "select * from pkgs17 where WO_NO = " & szParamID
+objRS.open szSQL, OBJdbConnection
+Do While Not objRs.EOF
+
+   if objRS("STAGE") = 1 then
+      'task
+      response.write("<TR><TD>BODY ID</TD> <TD>BODYYEAR</TD> </TR> ")
+      response.write("<tr><td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("DESC") & "'></td> </tr>")
+   end if
+
+   if objRS("STAGE") = 2 then
+      'option
+      response.write("<TR><TD>BODY ID</TD> <TD>BODYYEAR</TD> <TD>BODYSTYLE</TD> </TR> ")
+      response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td> <td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td> </tr>")
+   end if
+
+   objRS.MoveNext
+Loop
+
+
+' *************************************************************************************************
+'	End tasks and options
+' *************************************************************************************************
+response.write "</table>"
+
+
+
+' *************************************************************************************************
+'	End MAIN WO table and form
+' *************************************************************************************************
 objRS.Close
 set objRS = Nothing
 OBJdbConnection.close
 set OBJdbConnection = nothing
 
-' *************************************************************************************************
-'	End MAIN WO table and form
-' *************************************************************************************************
-response.write "</table>"
+
 response.write "<div align='right'><input type='button' name='cancel' id='cancel' value='Cancel' onclick='onCancel();'> &nbsp; &nbsp; <input type='button' name='update' id='update' value='Update' onclick='onUpdateWO();'></div>"
 response.write "</form>"
 
