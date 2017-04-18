@@ -37,6 +37,8 @@ dim szFromDate, szToDate
 'dim szTemp, szSQL
 Dim OBJdbConnection
 Dim objRS
+Dim iTaskCount, iOptCount
+
 'Dim rsSwitches
 'Dim iRecordCount, iProcYesCount, iSkipFlag, iEmailAvail, iEmailSent, iCalled, iPendingCount
 'Dim iDeclined, iLeftVM, iNotCalled, iRecall, iRetainedCount, iNotRetainedCount, iProcNoCount
@@ -153,16 +155,17 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 
 }
 
-        var NumOfRow = 1;
+var NumOfTask = 1;
+var NumOfOpt = 1;
     
         function Button1_onclick(){
-            NumOfRow++;
+            NumOfTask++;
             // get the refference of the main Div
-            var mainDiv = document.getElementById('MainDiv');
+            var mainDiv = document.getElementById('MainDiv1');
             
             // create new div that will work as a container
             var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','innerDiv'+NumOfRow);
+            newDiv.setAttribute('id','innerDiv'+NumOfTask);
             
             //create span to contain the text
             var newSpan = document.createElement('span');
@@ -171,17 +174,57 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
             newTextBox.type = 'text';
-            newTextBox.setAttribute('id','txtAddr'+NumOfRow);
+            newTextBox.setAttribute('id','txtAddr'+NumOfTask);
             
             // create remove button for each email adress
             var newButton = document.createElement('input');
             newButton.type = 'button';
             newButton.value = 'Remove';
-            newButton.id = 'btn'+NumOfRow;
+            newButton.id = 'btn'+NumOfTask;
             
             // atach event for remove button click
             newButton.onclick = function RemoveEntry() { 
-                var mainDiv = document.getElementById('MainDiv');
+                var mainDiv = document.getElementById('MainDiv1');
+                mainDiv.removeChild(this.parentNode);
+            }
+            
+            // append the span, textbox and the button
+            newDiv.appendChild(newSpan);
+            newDiv.appendChild(newTextBox);
+            newDiv.appendChild(newButton);
+            
+            // finally append the new div to the main div
+            mainDiv.appendChild(newDiv);
+    
+        }
+
+        function Button2_onclick(){
+            NumOfOpt++;
+            // get the refference of the main Div
+            var mainDiv = document.getElementById('MainDiv2');
+            
+            // create new div that will work as a container
+            var newDiv = document.createElement('div');
+            newDiv.setAttribute('id','innerDiv'+NumOfOpt);
+            
+            //create span to contain the text
+            var newSpan = document.createElement('span');
+            newSpan.innerHTML = "Enter Your Mail Address ";
+            
+            // create new textbox for email entry
+            var newTextBox = document.createElement('input');
+            newTextBox.type = 'text';
+            newTextBox.setAttribute('id','txtAddr'+NumOfOpt);
+            
+            // create remove button for each email adress
+            var newButton = document.createElement('input');
+            newButton.type = 'button';
+            newButton.value = 'Remove';
+            newButton.id = 'btn'+NumOfOpt;
+            
+            // atach event for remove button click
+            newButton.onclick = function RemoveEntry() { 
+                var mainDiv = document.getElementById('MainDiv2');
                 mainDiv.removeChild(this.parentNode);
             }
             
@@ -283,7 +326,7 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
            }
 </style>
 
-<BODY>
+<BODY onload='onPageLoad()'>
 <!-- *************************************************************************************************
 	Start HTML BODY
      *************************************************************************************************
@@ -351,36 +394,113 @@ Loop
 ' *************************************************************************************************
 response.write "</table>"
 
+
+objRS.Close
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '2'"
+objRS.open szSQL, OBJdbConnection
+'output javascript onPageLoad() function to draw array with options
+%>
+<script language="JavaScript">
+
+function onPageLoad()
+{
+//function to add options to maindiv2
+
+            // get the refference of the main Div
+            var mainDiv = document.getElementById('MainDiv2');
+
+// for each record in pkgs17 where wo_no = this and stage = 2
+
+            NumOfOpt++;
+            
+            // create new div that will work as a container
+            var newDiv = document.createElement('div');
+            newDiv.setAttribute('id','innerDiv'+NumOfOpt);
+            
+            //create span to contain the text
+            var newSpan = document.createElement('span');
+            newSpan.innerHTML = "checkbox";
+            
+            // create new textbox for email entry
+            var newTextBox = document.createElement('input');
+            newTextBox.type = 'text';
+            newTextBox.setAttribute('id','txtAddr'+NumOfOpt);
+            
+            // create remove button for each email adress
+            var newButton = document.createElement('input');
+            newButton.type = 'button';
+            newButton.value = 'Remove';
+            newButton.id = 'btn'+NumOfOpt;
+            
+            // atach event for remove button click
+            newButton.onclick = function RemoveEntry() { 
+                var mainDiv = document.getElementById('MainDiv2');
+                mainDiv.removeChild(this.parentNode);
+            }
+            
+            // append the span, textbox and the button
+            newDiv.appendChild(newSpan);
+            newDiv.appendChild(newTextBox);
+            newDiv.appendChild(newButton);
+            
+            // finally append the new div to the main div
+            mainDiv.appendChild(newDiv);
+// end for each record
+
+
+}
+
+<%
+
 'Enter Your Mail Address <input id="txtAddr1" type="text" />
 '<input id="Button1" type="button" value="Add More" onclick="Button1_onclick()" />
 
 
 response.write ("<table width='100%' border='1' id='wolist'> <TR> <TD align='center'>TASKS</TD> <TD align='center'>OPTIONS</TD> </TR>")
+response.write ("<TR><TD id='MainDiv1'>")
+
+' REUSE objRS, find all pkgs17 for tasks, loop, do same for options
 objRS.Close
-szSQL = "select * from pkgs17 where WO_NO = " & szParamID
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '1'"
 objRS.open szSQL, OBJdbConnection
+iTaskCount=0
 Do While Not objRs.EOF
-
-   if objRS("STAGE") = 1 then
-      'task
-      response.write("<TR><TD>BODY ID</TD> <TD>BODYYEAR</TD> </TR> ")
-      response.write("<tr><td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("DESC") & "'></td> </tr>")
-   end if
-
-   if objRS("STAGE") = 2 then
-      'option
-      response.write("<TR><TD>BODY ID</TD> <TD>BODYYEAR</TD> <TD>BODYSTYLE</TD> </TR> ")
-      response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td> <td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td> </tr>")
+   iTaskCount = iTaskCount + 1
+   if objRS("COMPLETED") = True then
+      response.write("<input type='checkbox' checked='checked' id='task" & iTaskCount & "'>  <input type='input' id='taskname'" & iTaskCount & " name='taskname'" & iTaskCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveTask" & iTaskCount & "' id='RemoveTask" & iTaskCount & "' value='Remove' onclick='onRemoveTask" & iTaskCount & "();'> <BR>" )
+   else
+      response.write("<input type='checkbox' id='task" & iTaskCount & "'>  <input type='input' id='taskname'" & iTaskCount & " name='taskname'" & iTaskCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveTask" & iTaskCount & "' id='RemoveTask" & iTaskCount & "' value='Remove' onclick='onRemoveTask" & iTaskCount & "();'> <BR>" )
    end if
 
    objRS.MoveNext
 Loop
+'show blank line for adding
+response.write("<input type='checkbox' id='taskadd1'> <input id='txtAddr' type='text' /> <input id='Button1' type='button' value='Add More' onclick='Button1_onclick()' /> ")
+
+objRS.Close
+response.write ("</TD><TD id='MainDiv2'>")
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '2'"
+objRS.open szSQL, OBJdbConnection
+iOptCount = 0
+
+Do While Not objRs.EOF
+   iOptCount = iOptCount + 1
+   if objRS("COMPLETED") = True then
+      response.write("<input type='checkbox' checked='checked' id='option" & iOptCount & "'>  <input type='input' id='optionname'" & iOptCount & " name='optionname'" & iOptCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveOpt" & iOptCount & "' id='RemoveOpt" & iOptCount & "' value='Remove' onclick='onRemoveOpt" & iOptCount & "();'> <BR>" )
+   else
+      response.write("<input type='checkbox' id='option" & iOptCount & "'>  <input type='input' id='optionname'" & iOptCount & " name='optionname'" & iOptCount & " value='" & objRS("NAME") & "'> <BR>" )
+   end if
+
+   objRS.MoveNext
+Loop
+'show blank line for adding
+response.write("<input type='checkbox' id='optionadd1'> <input id='txtAdd2' type='text' /> <input id='Button2' type='button' value='Add More' onclick='Button2_onclick()' /> ")
 
 
 ' *************************************************************************************************
 '	End tasks and options
 ' *************************************************************************************************
-response.write "</table>"
+response.write "</td> </tr> </table>"
 
 
 
