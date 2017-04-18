@@ -64,8 +64,6 @@ szParamID = Request.QueryString("ID")
 -->
 
 <script language="JavaScript">
-var NumOfTask = 1;
-var NumOfOpt = 1;
 
 function onUpdateWO()
 {
@@ -109,7 +107,56 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 
 }
 
+function UpdateCalledStatus(memsep, controlid)
+{
+//alert ('list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%=szToDate%>&UpdateFlag=TRUE&memsep=' + memsep + '&called='+controlid.options[controlid.selectedIndex].text);
+//return;
+ 
+//if status = declined, open a popup-box for notes
+//if cancelled abort status change, otherwise save notes and call status
 
+if (controlid.options[controlid.selectedIndex].text == "Declined") 
+    {
+	//alert ("Enter NOTES");
+	var notes = prompt ("Enter Notes:");
+	if (notes!=null)
+	{
+	    //alert ("Save notes");
+	    document.body.style.cursor = 'wait';
+	    window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%=szToDate%>&UpdateFlag=TRUE&memsep=' + memsep + '&called='+controlid.options[controlid.selectedIndex].text + '&notes='+notes;
+	}
+	else
+	{
+	    //nevermind, do not update
+	}
+	return;
+
+    }
+
+
+
+document.body.style.cursor = 'wait';
+
+//will always have a from/to date if updating, vars are set in ASP at top of script
+//alert(memsep + ":" + controlid.options[controlid.selectedIndex].text);
+window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%=szToDate%>&UpdateFlag=TRUE&memsep=' + memsep + '&called='+controlid.options[controlid.selectedIndex].text;
+
+
+}
+
+function UpdateRetained(memsep, controlid)
+{
+
+document.body.style.cursor = 'wait';
+
+//alert(memsep + ":" + controlid.options[controlid.selectedIndex].text);
+window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%=szToDate%>&UpdateFlag=TRUE&memsep=' + memsep + '&retained_flag='+controlid.options[controlid.selectedIndex].text;
+
+
+}
+
+var NumOfTask = 1;
+var NumOfOpt = 1;
     
         function Button1_onclick(){
             NumOfTask++;
@@ -118,28 +165,22 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
             
             // create new div that will work as a container
             var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','taskinnerDiv'+NumOfTask);
+            newDiv.setAttribute('id','innerDiv'+NumOfTask);
             
             //create span to contain the text
             var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'taskbox'+NumOfTask);
-            newCheckBox.setAttribute('name', 'taskbox'+NumOfTask);
+            newSpan.innerHTML = "Enter Your Mail Address ";
             
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
             newTextBox.type = 'text';
-            newTextBox.setAttribute('id','taskname'+NumOfTask);
-            newTextBox.setAttribute('name','taskname'+NumOfTask);
+            newTextBox.setAttribute('id','txtAddr'+NumOfTask);
             
             // create remove button for each email adress
             var newButton = document.createElement('input');
             newButton.type = 'button';
             newButton.value = 'Remove';
-            newButton.id = 'taskbtn'+NumOfTask;
+            newButton.id = 'btn'+NumOfTask;
             
             // atach event for remove button click
             newButton.onclick = function RemoveEntry() { 
@@ -149,7 +190,6 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
             
             // append the span, textbox and the button
             newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
             newDiv.appendChild(newTextBox);
             newDiv.appendChild(newButton);
             
@@ -165,28 +205,22 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
             
             // create new div that will work as a container
             var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','optinnerDiv'+NumOfOpt);
+            newDiv.setAttribute('id','innerDiv'+NumOfOpt);
             
             //create span to contain the text
             var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'optbox'+NumOfOpt);
-            newCheckBox.setAttribute('name', 'optbox'+NumOfOpt);
+            newSpan.innerHTML = "Enter Your Mail Address ";
             
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
             newTextBox.type = 'text';
-            newTextBox.setAttribute('id','optname'+NumOfOpt);
-            newTextBox.setAttribute('name','optname'+NumOfOpt);
+            newTextBox.setAttribute('id','txtAddr'+NumOfOpt);
             
             // create remove button for each email adress
             var newButton = document.createElement('input');
             newButton.type = 'button';
             newButton.value = 'Remove';
-            newButton.id = 'optbtn'+NumOfOpt;
+            newButton.id = 'btn'+NumOfOpt;
             
             // atach event for remove button click
             newButton.onclick = function RemoveEntry() { 
@@ -196,7 +230,6 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
             
             // append the span, textbox and the button
             newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
             newDiv.appendChild(newTextBox);
             newDiv.appendChild(newButton);
             
@@ -363,7 +396,7 @@ response.write "</table>"
 
 
 objRS.Close
-szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '1'"
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '2'"
 objRS.open szSQL, OBJdbConnection
 'output javascript onPageLoad() function to draw array with options
 %>
@@ -371,139 +404,33 @@ objRS.open szSQL, OBJdbConnection
 
 function onPageLoad()
 {
-//function to add tasks and options to maindiv1 & 2
+//function to add options to maindiv2
 
             // get the refference of the main Div
-            var mainDiv = document.getElementById('MainDiv1');
-<%
-iTaskCount=0
-Do While Not objRs.EOF
-%>
-            NumOfTask++;
-            
-            // create new div that will work as a container
-            var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','taskinnerDiv'+NumOfTask);
-            
-            //create span to contain the text
-            var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'taskbox'+NumOfTask);
-            newCheckBox.setAttribute('name', 'taskbox'+NumOfTask);
-            
-            // create new textbox for email entry
-            var newTextBox = document.createElement('input');
-            newTextBox.type = 'text';
-            newTextBox.setAttribute('id','taskname'+NumOfTask);
-            newTextBox.setAttribute('name','taskname'+NumOfTask);
-            newTextBox.value = '<%=objRS("NAME") %>';
-            
-            // create remove button for each email adress
-            var newButton = document.createElement('input');
-            newButton.type = 'button';
-            newButton.value = 'Remove';
-            newButton.id = 'taskbtn'+NumOfTask;
-            
-            // atach event for remove button click
-            newButton.onclick = function RemoveEntry() { 
-                var mainDiv = document.getElementById('MainDiv1');
-                mainDiv.removeChild(this.parentNode);
-            }
-            
-            // append the span, textbox and the button
-            newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
-            newDiv.appendChild(newTextBox);
-            newDiv.appendChild(newButton);
-            
-            // finally append the new div to the main div
-            mainDiv.appendChild(newDiv);
-// end for each record
-
-
-
-
-<% 
-objRS.MoveNext
-Loop
-%>
-//add new line for task, regardless of task count
-            NumOfTask++;
-            
-            // create new div that will work as a container
-            var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','taskinnerDiv'+NumOfTask);
-            
-            //create span to contain the text
-            var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'taskbox'+NumOfTask);
-            newCheckBox.setAttribute('name', 'taskbox'+NumOfTask);
-            
-            // create new textbox for email entry
-            var newTextBox = document.createElement('input');
-            newTextBox.type = 'text';
-            newTextBox.setAttribute('id','taskname'+NumOfTask);
-            newTextBox.setAttribute('name','taskname'+NumOfTask);
-            
-            // create remove button for each email adress
-            var newButton = document.createElement('input');
-            newButton.type = 'button';
-            newButton.value = 'Add More';
-            newButton.id = 'taskbtn'+NumOfTask;
-            newButton.onclick = Button1_onclick;
-            
-            // append the span, textbox and the button
-            newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
-            newDiv.appendChild(newTextBox);
-            newDiv.appendChild(newButton);
-            
-            // finally append the new div to the main div
-            mainDiv.appendChild(newDiv);
-
-            mainDiv = document.getElementById('MainDiv2');
-
+            var mainDiv = document.getElementById('MainDiv2');
 
 // for each record in pkgs17 where wo_no = this and stage = 2
-<%
-objRS.Close
-szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '2'"
-objRS.open szSQL, OBJdbConnection
-iTaskCount=0
-Do While Not objRs.EOF
-%>
-            //now do options
+
             NumOfOpt++;
             
             // create new div that will work as a container
             var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','optinnerDiv'+NumOfOpt);
+            newDiv.setAttribute('id','innerDiv'+NumOfOpt);
             
             //create span to contain the text
             var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'optbox'+NumOfOpt);
-            newCheckBox.setAttribute('name', 'optbox'+NumOfOpt);
+            newSpan.innerHTML = "checkbox";
             
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
             newTextBox.type = 'text';
-            newTextBox.setAttribute('id','optname'+NumOfOpt);
-            newTextBox.setAttribute('name','optname'+NumOfOpt);
-            newTextBox.value = '<%=objRS("NAME") %>';
+            newTextBox.setAttribute('id','txtAddr'+NumOfOpt);
             
             // create remove button for each email adress
             var newButton = document.createElement('input');
             newButton.type = 'button';
             newButton.value = 'Remove';
-            newButton.id = 'optbtn'+NumOfOpt;
+            newButton.id = 'btn'+NumOfOpt;
             
             // atach event for remove button click
             newButton.onclick = function RemoveEntry() { 
@@ -513,68 +440,67 @@ Do While Not objRs.EOF
             
             // append the span, textbox and the button
             newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
             newDiv.appendChild(newTextBox);
             newDiv.appendChild(newButton);
             
             // finally append the new div to the main div
             mainDiv.appendChild(newDiv);
 // end for each record
-<% 
-objRS.MoveNext
-Loop
-%>
-//add new line for options, regardless of option count
-//'response.write("<input id='Button2' type='button' value='Add More' onclick='Button2_onclick()' /> ")
-
-            NumOfOpt++;
-            
-            // create new div that will work as a container
-            var newDiv = document.createElement('div');
-            newDiv.setAttribute('id','optinnerDiv'+NumOfOpt);
-            
-            //create span to contain the text
-            var newSpan = document.createElement('span');
-            newSpan.innerHTML = "";
-            var newCheckBox = document.createElement('input');
-            newCheckBox.type = 'checkbox';
-            newCheckBox.setAttribute('id', 'optbox'+NumOfOpt);
-            newCheckBox.setAttribute('name', 'optbox'+NumOfOpt);
-            
-            // create new textbox for email entry
-            var newTextBox = document.createElement('input');
-            newTextBox.type = 'text';
-            newTextBox.setAttribute('id','optname'+NumOfOpt);
-            newTextBox.setAttribute('name','optname'+NumOfOpt);
-            
-            // create remove button for each email adress
-            var newButton = document.createElement('input');
-            newButton.type = 'button';
-            newButton.value = 'Add More';
-            newButton.id = 'optbtn'+NumOfOpt;
-            newButton.onclick = Button2_onclick;
-            
-            // append the span, textbox and the button
-            newDiv.appendChild(newSpan);
-            newDiv.appendChild(newCheckBox);
-            newDiv.appendChild(newTextBox);
-            newDiv.appendChild(newButton);
-            
-            // finally append the new div to the main div
-            mainDiv.appendChild(newDiv);
 
 
 }
-</SCRIPT>
 
 <%
 
+'Enter Your Mail Address <input id="txtAddr1" type="text" />
+'<input id="Button1" type="button" value="Add More" onclick="Button1_onclick()" />
+
+
+response.write ("<table width='100%' border='1' id='wolist'> <TR> <TD align='center'>TASKS</TD> <TD align='center'>OPTIONS</TD> </TR>")
+response.write ("<TR><TD id='MainDiv1'>")
+
+' REUSE objRS, find all pkgs17 for tasks, loop, do same for options
+objRS.Close
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '1'"
+objRS.open szSQL, OBJdbConnection
+iTaskCount=0
+Do While Not objRs.EOF
+   iTaskCount = iTaskCount + 1
+   if objRS("COMPLETED") = True then
+      response.write("<input type='checkbox' checked='checked' id='task" & iTaskCount & "'>  <input type='input' id='taskname'" & iTaskCount & " name='taskname'" & iTaskCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveTask" & iTaskCount & "' id='RemoveTask" & iTaskCount & "' value='Remove' onclick='onRemoveTask" & iTaskCount & "();'> <BR>" )
+   else
+      response.write("<input type='checkbox' id='task" & iTaskCount & "'>  <input type='input' id='taskname'" & iTaskCount & " name='taskname'" & iTaskCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveTask" & iTaskCount & "' id='RemoveTask" & iTaskCount & "' value='Remove' onclick='onRemoveTask" & iTaskCount & "();'> <BR>" )
+   end if
+
+   objRS.MoveNext
+Loop
+'show blank line for adding
+response.write("<input type='checkbox' id='taskadd1'> <input id='txtAddr' type='text' /> <input id='Button1' type='button' value='Add More' onclick='Button1_onclick()' /> ")
+
+objRS.Close
+response.write ("</TD><TD id='MainDiv2'>")
+szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '2'"
+objRS.open szSQL, OBJdbConnection
+iOptCount = 0
+
+Do While Not objRs.EOF
+   iOptCount = iOptCount + 1
+   if objRS("COMPLETED") = True then
+      response.write("<input type='checkbox' checked='checked' id='option" & iOptCount & "'>  <input type='input' id='optionname'" & iOptCount & " name='optionname'" & iOptCount & " value='" & objRS("NAME") & "'> <input type='button' name='RemoveOpt" & iOptCount & "' id='RemoveOpt" & iOptCount & "' value='Remove' onclick='onRemoveOpt" & iOptCount & "();'> <BR>" )
+   else
+      response.write("<input type='checkbox' id='option" & iOptCount & "'>  <input type='input' id='optionname'" & iOptCount & " name='optionname'" & iOptCount & " value='" & objRS("NAME") & "'> <BR>" )
+   end if
+
+   objRS.MoveNext
+Loop
+'show blank line for adding
+response.write("<input type='checkbox' id='optionadd1'> <input id='txtAdd2' type='text' /> <input id='Button2' type='button' value='Add More' onclick='Button2_onclick()' /> ")
+
 
 ' *************************************************************************************************
-'	Empty TASKS/OPTIONS table to be filled in by onLoad()
+'	End tasks and options
 ' *************************************************************************************************
-response.write ("<table width='100%' border='1' id='taskoptionlist'> <TR> <TD align='center'>TASKS</TD> <TD align='center'>OPTIONS</TD> </TR>")
-response.write ("<TR><TD id='MainDiv1'> </TD> <TD id='MainDiv2'> </td> </tr> </table>" )
+response.write "</td> </tr> </table>"
 
 
 

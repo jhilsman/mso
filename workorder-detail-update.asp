@@ -35,7 +35,7 @@ Const adOpenStatic = 3
 Const adLockOptimistic = 3
 Const adUseClient = 3
 
-dim szSQL, szParamID
+dim szSQL, szParamID, iCounter
 dim szFromDate, szToDate
 'dim szTemp, szSQL
 Dim OBJdbConnection
@@ -333,6 +333,44 @@ end if
 objRs.Update
 objRS.Close
 set objRS = Nothing
+
+Dim x
+
+For x = 1 to Request.Form.Count 
+  Response.Write x & ": " _ 
+    & Request.Form.Key(x) & "=" & Request.Form.Item(x) & "<BR>" 
+Next 
+
+
+'wipe pkgs for this WO, loop to recreate each one from form data
+szSQL = "DELETE * FROM PKGS17 WHERE WO_NO = '" & szParamID & "'"
+response.write ("<BR>" & szSQL & "<BR>")
+'OBJdbConnection.Execute szSQL
+
+'for each task and option, tasks first
+iCounter = 1
+do while iCounter < 50
+   'write record if <> ""
+   if Request.Form("taskname" & iCounter) <> "" then
+      'INSERT INTO Customers (CustomerName, City, Country) VALUES ('Cardinal', 'Stavanger', 'Norway');
+      if Request.Form("taskbox" & iCounter) = "on" then
+         szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO, COMPLETED) VALUES ('" & Request.Form("taskname" & iCounter) & "','1','" & szParamID & "', True)"
+      else
+         szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO) VALUES ('" & Request.Form("taskname" & iCounter) & "','1','" & szParamID & "')"
+      end if
+      response.write (szSQL)
+   end if
+   iCounter = iCounter + 1
+Loop
+
+'for each task and option, now options
+iCounter = 1
+do while iCounter < 50
+
+   iCounter = iCounter + 1
+Loop
+
+
 
 ' *************************************************************************************************
 '	Update PKGS17 if we changed the WO#
