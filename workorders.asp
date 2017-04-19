@@ -31,15 +31,17 @@ Function IIf(i,j,k)
 End Function
 
 
-dim szSQL, szParamID, szTasks, szOptions
+dim szSQL, szParamID, szTasks, szOptions, szFilterParam
 dim szFromDate, szToDate
 Dim OBJdbConnection
-Dim objRS, objPkgsRS
+Dim objRS, objPkgsRS, objRSStatus
 Dim iWOLineCount, iTaskCompleteCount, iTaskCount, iOPtCompleteCount, iOptCount
 Dim szSortParam
 
 szSortParam = Request.QueryString("ORDER")
+szFilterParam = Request.QueryString("FILTER")
 if Len(szSortParam) < 2 then szSortParam = "ORDER_DATE"
+If Len(szFilterParam) < 2 or szFilterParam = "NOTDELIVERED" then szFilterParam = "<> '4'"
 
 ' *************************************************************************************************
 '	Open db connection and get ready to update and/or query
@@ -50,8 +52,21 @@ OBJdbConnection.mode = 3 ' adModeReadWrite
 OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john\desktop\body\mso\mso.mdb;"
 
 Set ObjRs = Server.CreateObject("ADODB.Recordset")
+
+'get filter status if needed
+if szFilterParam <> "<> '4'" then
+   Set ObjRSStatus = Server.CreateObject("ADODB.Recordset")
+   szSQL = "SELECT * FROM STAGES17 WHERE NAME = '" & szFilterParam & "'"
+   objRSStatus.Open szSQL, OBJdbConnection
+   szFilterParam = " = '" & ObjRSStatus("ID") &  "'"
+   ObjRSStatus.Close
+   set ObjRSStatus = Nothing
+end if
+
+
+'get WOs
 'szSQL = "select * from WO17 "
-szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 WHERE STATUS <> '4' ORDER BY " & szSortParam
+szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 WHERE STATUS " & szFilterParam & " ORDER BY " & szSortParam
 
 objRS.open szSQL, OBJdbConnection
 
@@ -92,9 +107,22 @@ do while iWOLineCount < 50
 loop
 %>
 
+function onFilterStatus () {
+   var x = document.getElementById('statusselection').value
+
+   window.location.href = 'workorders.asp?filter=' +x ;
+
+}
+
 function myFunction(myMessage) {
    alert(myMessage);
 
+}
+
+
+function onNew()
+{
+window.location='workorder-detail.asp';
 }
 
 <%
@@ -215,8 +243,9 @@ Loop
 
 <table width='100%' border='1' id='wolist'>
 <TR>
-<TD><A href='workorders.asp?order=STATUS'>STATUS</A> <BR><select id="STATUSSELECTION">
-  <option selected="SELECTED" value="NOT DELIVERED">NOT DELIVERED</option>
+<TD><A href='workorders.asp?order=STATUS'>STATUS</A> <BR><select id="statusselection" name="statusselection" onchange="onFilterStatus()">
+  <option value=""></option>
+  <option value="NOTDELIVERED">NOT DELIVERED</option>
   <option value="QUEUED">QUEUED</option>
   <option value="BUILDING">BUILDING</option>
   <option value="COMPLETED">COMPLETED</option>
@@ -287,7 +316,7 @@ Loop
 
 </table>
 <BR>
-<input type='button' value='NEW' id='newbutton'>
+<input type='button' value='NEW' id='newbutton' onclick='onNew()'>
 <BR>
 
 </BODY></HTML>

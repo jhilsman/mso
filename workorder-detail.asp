@@ -32,11 +32,11 @@ Function IIf(i,j,k)
 End Function
 
 
-dim szSQL, szParamID
+dim szSQL, szParamID, szStatus
 dim szFromDate, szToDate
-'dim szTemp, szSQL
+'dim szTemp, szSQL, 
 Dim OBJdbConnection
-Dim objRS
+Dim objRS, objRSStatus
 Dim iTaskCount, iOptCount
 
 'Dim rsSwitches
@@ -305,11 +305,11 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 if szParamID = "" then
    response.write ("EMPTY ID! Creating?<BR>")
    'display new form?
-   response.end
-   szSQL = "select * from WO17"
+   'response.end
 else
    response.write ("ID = '" & szParamID & "'<BR>")
-   szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 where WO_NO ='" & szParamID & "'"
+   'szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 where WO_NO ='" & szParamID & "'"
+   szSQL = "select * from WO17 where WO_NO ='" & szParamID & "'"
 end if
 'response.write ( szSQL & "<br>")
 response.write ("<FORM name='wo-detail' id='wo-detail' action='workorder-detail-update.asp' method='post'>")
@@ -341,20 +341,48 @@ OBJdbConnection.mode = 3 ' adModeReadWrite
 OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john\desktop\body\mso\mso.mdb;"
 
 Set ObjRs = Server.CreateObject("ADODB.Recordset")
+Set objRSStatus = Server.CreateObject("ADODB.Recordset")
 
-objRS.open szSQL, OBJdbConnection
 
-' *************************************************************************************************
-'	List row, close db
-' *************************************************************************************************
-Do While Not objRs.EOF
+'if not a new record, read it
+if szParamID <> "" then 
+   objRS.open szSQL, OBJdbConnection
+   szSQL = "SELECT * FROM STAGES17 ORDER BY ID"
+   objRSStatus.Open szSQL, OBJdbConnection
 
-response.write("<tr><td> <BR><select id='STATUSSELECTION' name='statusselection'> <option selected='SELECTED' value='ALL'>ALL</option> <option value='QUEUED'>QUEUED</option> <option value='BUILDING'>BUILDING</option> <option value='COMPLETED'>COMPLETED</option> <option value='DELIVERED'>DELIVERED</option> </select> <BR> <input type='input' size='10' id='status' name='status' value='" & objRS("STATUS") & "'><BR>" & objRS("STATUS_") & "</td><td> <input type='hidden' id='wo_no_old' name='wo_no_old' value='" & objRS("WO_NO") & "'> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td><td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> </td><td> <input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> </td> <td><input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'></td> <td> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td></tr>") 
+   ' *************************************************************************************************
+   '	List row, close db
+   ' *************************************************************************************************
+   'doesn't really have to be a loop - should never be > 1 WO with this id!
+   Do While Not objRs.EOF
+
+      objRSStatus.MoveFirst
+      szStatus = "<select id='statusselection' name='statusselection'> "
+      do while not objRSStatus.EOF
+         if objRSStatus("ID") = CInt(objRS("STATUS")) then
+            szStatus = szStatus & "<option selected='SELECTED' value='" & objRSStatus("NAME") & "'>" & objRSStatus("NAME") & "</option> "
+         else
+            szStatus = szStatus & "<option value='" & objRSStatus("NAME") & "'>" & objRSStatus("NAME") & "</option> "
+         end if
+         objRSStatus.MoveNext
+      Loop
+      szStatus = szStatus & " </SELECT>"
+      response.write("<tr><td> " & szStatus & "</td><td> <input type='hidden' id='wo_no_old' name='wo_no_old' value='" & objRS("WO_NO") & "'> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td><td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='order_date' name='order_date' value='" & objRS("ORDER_DATE") & "'> </td><td> <input type='input' size='12' id='req_date' name='req_date' value='" & objRS("REQ_DATE") & "'> </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' value='" & objRS("PRODUCTIONSTART_DATE") & "'> </td> <td><input type='input' size='12' id='po_no' name='po_no' value='" & objRS("PO_NO") & "'></td> <td> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td></tr>") 
+      response.write("<TR><TD>BODY ID</TD> <TD>MODEL #</TD> <TD>INV DATE</TD> <TD>INV #</TD> <TD>LENGTH</TD> <TD>BODY WEIGHT</TD> <TD>BODYYEAR</TD> <TD>BODYSTYLE</TD> </TR> ")
+      response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td> <td><input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'></td> <td><input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'></td><td><input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'></td> <td><input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'></td><td><input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'></td> <td><input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'></td> <td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td> </tr>")
+      objRS.MoveNext
+   Loop
+
+   objRS.Close
+   objRSStatus.Close
+
+else
+   'new record, display form
+   szStatus = "<SELECT id='statusselection' name='statusselection'> <option value='queued'>QUEUED</option> </SELECT>"
+   response.write("<tr><td> " & szStatus & "</td><td> <input type='hidden' id='wo_no_old' name='wo_no_old' > <input type='input' size='12' id='wo_no' name='wo_no' ></td><td> <input type='input' id='customer' name='customer' > </td><td> <input type='input' size='12' id='order_date' name='order_date' > </td><td> <input type='input' size='12' id='req_date' name='req_date' > </td><td> <input type='input' size='12' id='productionstart_date' name='productionstart_date' > </td> <td><input type='input' size='12' id='po_no' name='po_no' ></td> <td> <input type='input' id='vin' name='vin' >  </td></tr>") 
    response.write("<TR><TD>BODY ID</TD> <TD>MODEL #</TD> <TD>INV DATE</TD> <TD>INV #</TD> <TD>LENGTH</TD> <TD>BODY WEIGHT</TD> <TD>BODYYEAR</TD> <TD>BODYSTYLE</TD> </TR> ")
-   response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' value='" & objRS("BODYID") & "'></td> <td><input type='input' size='12' id='model_no' name='model_no' value='" & objRS("MODEL_NO") & "'></td> <td><input type='input' size='12' id='invoice_date' name='invoice_date' value='" & objRS("INVOICE_DATE") & "'></td><td><input type='input' size='12' id='inv_no' name='inv_no' value='" & objRS("INV_NO") & "'></td> <td><input type='input' size='10' id='length' name='length' value='" & objRS("LENGTH") & "'></td><td><input type='input' size='12' id='body_weight' name='body_weight' value='" & objRS("BODY_WEIGHT") & "'></td> <td><input type='input' size='12' id='body_year' name='body_year' value='" & objRS("BODY_YEAR") & "'></td> <td><input type='input' id='bodystyle' name='bodystyle' value='" & objRS("BODYSTYLE") & "'></td> </tr>")
-
-   objRS.MoveNext
-Loop
+   response.write("<tr><td><input type='input' size='12' id='bodyid' name='bodyid' ></td> <td><input type='input' size='12' id='model_no' name='model_no' ></td> <td><input type='input' size='12' id='invoice_date' name='invoice_date' ></td><td><input type='input' size='12' id='inv_no' name='inv_no' ></td> <td><input type='input' size='10' id='length' name='length' ></td><td><input type='input' size='12' id='body_weight' name='body_weight' ></td> <td><input type='input' size='12' id='body_year' name='body_year' ></td> <td><input type='input' id='bodystyle' name='bodystyle' ></td> </tr>")
+end if
 
 ' *************************************************************************************************
 '	End WO item detail, show tasks and options
@@ -362,7 +390,6 @@ Loop
 response.write "</table>"
 
 
-objRS.Close
 szSQL = "select * from pkgs17 where WO_NO = '" & szParamID & "' and STAGE = '1'"
 objRS.open szSQL, OBJdbConnection
 'output javascript onPageLoad() function to draw array with options
@@ -392,6 +419,7 @@ Do While Not objRs.EOF
             newCheckBox.type = 'checkbox';
             newCheckBox.setAttribute('id', 'taskbox'+NumOfTask);
             newCheckBox.setAttribute('name', 'taskbox'+NumOfTask);
+<% if objRS("COMPLETED") then response.write ("newCheckBox.setAttribute('checked', 'checked');") %>
             
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
@@ -491,6 +519,7 @@ Do While Not objRs.EOF
             newCheckBox.type = 'checkbox';
             newCheckBox.setAttribute('id', 'optbox'+NumOfOpt);
             newCheckBox.setAttribute('name', 'optbox'+NumOfOpt);
+<% if objRS("COMPLETED") then response.write ("newCheckBox.setAttribute('checked', 'checked');") %>
             
             // create new textbox for email entry
             var newTextBox = document.createElement('input');
@@ -583,6 +612,7 @@ response.write ("<TR><TD id='MainDiv1'> </TD> <TD id='MainDiv2'> </td> </tr> </t
 ' *************************************************************************************************
 objRS.Close
 set objRS = Nothing
+set objRSStatus = Nothing
 OBJdbConnection.close
 set OBJdbConnection = nothing
 

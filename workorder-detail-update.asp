@@ -39,7 +39,7 @@ dim szSQL, szParamID, iCounter
 dim szFromDate, szToDate
 'dim szTemp, szSQL
 Dim OBJdbConnection
-Dim objRS
+Dim objRS, objRSStatus
 'Dim rsSwitches
 'Dim iRecordCount, iProcYesCount, iSkipFlag, iEmailAvail, iEmailSent, iCalled, iPendingCount
 'Dim iDeclined, iLeftVM, iNotCalled, iRecall, iRetainedCount, iNotRetainedCount, iProcNoCount
@@ -255,28 +255,6 @@ window.location.href = 'list-switches-csr.asp?FromDate=<%=szFromDate%>&ToDate=<%
 -->
 <%
 ' *************************************************************************************************
-'	Prep the form - counters, query string
-' *************************************************************************************************
-if szParamID = "" then
-   response.write ("EMPTY ID! Creating?<BR>")
-   'display new form?
-   response.end
-else
-   response.write ("ID = '" & szParamID & "'<BR>")
-   szSQL = "select * from WO17 where WO_NO ='" & szParamID & "'"
-end if
-response.write ( szSQL & "<br>")
-
-
-%>
-
-<!-- *************************************************************************************************
-	Main WO Table and header
-     *************************************************************************************************
--->
-
-<%
-' *************************************************************************************************
 '	Open db connection and get ready to update and/or query
 ' *************************************************************************************************
 'open database connection
@@ -285,16 +263,37 @@ OBJdbConnection.mode = 3 ' adModeReadWrite
 OBJdbConnection.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\users\john\desktop\body\mso\mso.mdb;"
 
 Set ObjRs = Server.CreateObject("ADODB.Recordset")
+Set objRSStatus = Server.CreateObject("ADODB.Recordset")
 
-objRS.open szSQL, OBJdbConnection, adOpenStatic, adLockOptimistic
+' *************************************************************************************************
+'	Prep the form - counters, query string
+' *************************************************************************************************
+if szParamID = "" then
+   response.write ("EMPTY ID! Creating?<BR>")
+   'display new form?
+   'response.end
+   szSQL = "select * from WO17"
+   objRS.open szSQL, OBJdbConnection, adOpenStatic, adLockOptimistic
+   objRS.AddNew
+   szParamID = Request.Form("wo_no")
+else
+   response.write ("ID = '" & szParamID & "'<BR>")
+   szSQL = "select * from WO17 where WO_NO ='" & szParamID & "'"
+   objRS.open szSQL, OBJdbConnection, adOpenStatic, adLockOptimistic
+
+end if
+
+
 
 
 ' *************************************************************************************************
 '	UPDATE RECORD
 ' *************************************************************************************************
-'response.write (Request.Form("statusselection"))
 'lookup 'queued' 'building' etc to get value for status
-objRs("status") = Request.Form("status")
+szSQL = "SELECT * FROM STAGES17 WHERE NAME = '" & Request.Form("statusselection") & "'"
+objRSStatus.Open szSQL, OBJdbConnection, adOpenStatic, adLockOptimistic
+objRs("status") = objRSStatus("ID")
+
 
 objRs("wo_no") = Request.Form("wo_no")
 objRs("customer") = Request.Form("customer")
@@ -332,7 +331,9 @@ end if
 
 objRs.Update
 objRS.Close
+objRSStatus.Close
 set objRS = Nothing
+set objRSStatus = Nothing
 
 Dim x
 
@@ -344,28 +345,38 @@ Next
 
 'wipe pkgs for this WO, loop to recreate each one from form data
 szSQL = "DELETE * FROM PKGS17 WHERE WO_NO = '" & szParamID & "'"
-response.write ("<BR>" & szSQL & "<BR>")
-'OBJdbConnection.Execute szSQL
+'response.write ("<BR>" & szSQL & "<BR>")
+OBJdbConnection.Execute szSQL
 
 'for each task and option, tasks first
 iCounter = 1
-do while iCounter < 50
+do while iCounter < 100
    'write record if <> ""
    if Request.Form("taskname" & iCounter) <> "" then
-      'INSERT INTO Customers (CustomerName, City, Country) VALUES ('Cardinal', 'Stavanger', 'Norway');
       if Request.Form("taskbox" & iCounter) = "on" then
          szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO, COMPLETED) VALUES ('" & Request.Form("taskname" & iCounter) & "','1','" & szParamID & "', True)"
       else
          szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO) VALUES ('" & Request.Form("taskname" & iCounter) & "','1','" & szParamID & "')"
       end if
-      response.write (szSQL)
+      'response.write (szSQL)
+      OBJdbConnection.Execute szSQL
    end if
    iCounter = iCounter + 1
 Loop
 
 'for each task and option, now options
 iCounter = 1
-do while iCounter < 50
+do while iCounter < 100
+   'write record if <> ""
+   if Request.Form("optname" & iCounter) <> "" then
+      if Request.Form("optbox" & iCounter) = "on" then
+         szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO, COMPLETED) VALUES ('" & Request.Form("optname" & iCounter) & "','2','" & szParamID & "', True)"
+      else
+         szSQL = "INSERT INTO PKGS17 (NAME, STAGE, WO_NO) VALUES ('" & Request.Form("optname" & iCounter) & "','2','" & szParamID & "')"
+      end if
+      'response.write (szSQL)
+      OBJdbConnection.Execute szSQL
+   end if
 
    iCounter = iCounter + 1
 Loop
@@ -378,7 +389,7 @@ Loop
 if szParamID <> request.form("wo_no") then
    szSQL = "UPDATE PKGS17 SET WO_NO = '" & request.form("WO_NO") & "' WHERE WO_NO = '" & szParamID & "'"
    'update pkgs.wo to request.form("wo_no") where pkgs.wo = szParamID
-   response.write ("<BR>" & szSQL & "<BR>")
+   'response.write ("<BR>" & szSQL & "<BR>")
    OBJdbConnection.Execute szSQL
 end if
 
