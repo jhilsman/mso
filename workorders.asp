@@ -125,6 +125,11 @@ function onNew()
 window.location='workorder-detail.asp';
 }
 
+function onTrucks()
+{
+window.location='trucks.asp';
+}
+
 <%
 ' *************************************************************************************************
 '    Write Java functions for flipping tasks and options
@@ -298,7 +303,7 @@ Do While Not objRs.EOF
    szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
    szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
 
-   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> " & objRS("VIN") & "</td> </tr>")
+   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> <A href='truck-detail.asp?vin=" & objRS("VIN") & "'>" & objRS("VIN") & "</td> </tr>")
    objRS.MoveNext
    objPkgsRS.Close
    set objPkgsRS = Nothing
@@ -316,7 +321,7 @@ Loop
 
 </table>
 <BR>
-<input type='button' value='NEW' id='newbutton' onclick='onNew()'>
+<input type='button' value='NEW' id='newbutton' onclick='onNew()'> &nbsp; <input type='button' value='TRUCKS' id='newbutton' onclick='onTrucks()'> &nbsp;
 <BR>
 
 </BODY></HTML>

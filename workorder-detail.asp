@@ -87,7 +87,8 @@ document.forms[monthtozoom-1].submit();
 
 function onCancel()
 {
-window.location='workorders.asp';
+//window.location='workorders.asp';
+window.history.back();
 }
 
 function UpdateEmailFlag(memsep)
