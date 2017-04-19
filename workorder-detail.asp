@@ -70,8 +70,15 @@ var NumOfOpt = 1;
 function onUpdateWO()
 {
 
+   var v = document.getElementById('wo_no').value;
+
    //validate data, alert error or
-    document.getElementById('wo-detail').submit();
+   if ( v == "" || v == null ) {
+      alert ('WO#  is required');
+   } else {
+      //alert ('Good WO#');
+      document.getElementById('wo-detail').submit();
+   }
 
 }
 

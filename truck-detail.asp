@@ -70,8 +70,15 @@ var NumOfOpt = 1;
 function onUpdateWO()
 {
 
+   var v = document.getElementById('vin').value;
+
    //validate data, alert error or
-    document.getElementById('wo-detail').submit();
+   if ( v == "" || v == null ) {
+      alert ('VIN is required');
+   } else {
+      //alert ('Good VIN');
+      document.getElementById('wo-detail').submit();
+   }
 
 }
 
