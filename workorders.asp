@@ -38,6 +38,8 @@ Dim objRS, objPkgsRS, objRSStatus
 Dim iWOLineCount, iTaskCompleteCount, iTaskCount, iOPtCompleteCount, iOptCount
 Dim szSortParam
 
+
+
 szSortParam = Request.QueryString("ORDER")
 szFilterParam = Request.QueryString("FILTER")
 if Len(szSortParam) < 2 then szSortParam = "ORDER_DATE"
@@ -62,12 +64,18 @@ if szFilterParam <> "<> '4'" then
    ObjRSStatus.Close
    set ObjRSStatus = Nothing
 end if
-
+if szFilterParam = " = '4'" then
+    szSortParam = "DELIVERED_DATE DESC"
+end if
+if szSortParam = "DELIVERED_DATE" then 
+    szFilterParam =" = '4'"
+    szSortParam = szSortParam & " DESC"
+end if
 
 'get WOs
 'szSQL = "select * from WO17 "
 szSQL = "select *, DLookUp('[NAME]','STAGES17','ID=' & [STATUS]) AS STATUS_ from WO17 WHERE STATUS " & szFilterParam & " ORDER BY " & szSortParam
-
+'response.write szSQL
 objRS.open szSQL, OBJdbConnection
 
 if objRS.EOF then
@@ -123,6 +131,14 @@ function myFunction(myMessage) {
 function onNew()
 {
 window.location='workorder-detail.asp';
+}
+
+function onVINSearch()
+{
+   var x = document.getElementById('vinsearch').value
+
+   window.location.href = 'truck-detail.asp?vin=' +x ;
+
 }
 
 function onTrucks()
@@ -256,14 +272,19 @@ Loop
   <option value="COMPLETED">COMPLETED</option>
   <option value="DELIVERED">DELIVERED</option>
 </select></TD> 
-<TD><A href='workorders.asp?order=WO_NO'>WORK ORDER #<A> <BR><INPUT type='textbox' size='8' id='wosearch'><input type='button' value='S' id='wosearchbutton'></TD> 
+<TD><A href='workorders.asp?order=WO_NO<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>WORK ORDER #<A> </TD> 
 <TD>TASKS</TD>
 <TD>OPTIONS</TD> 
-<TD><A href='workorders.asp?order=CUSTOMER'>CUSTOMER</A> <BR><INPUT type='textbox' size='8' id='custsearch'><input type='button' value='S' id='custsearchbutton'></TD> 
-<TD><A href='workorders.asp?order=ORDER_DATE'>ORDER DATE</A> </TD> 
-<TD><A href='workorders.asp?order=REQ_DATE'>REQ DATE</A> </TD> 
-<TD><A href='workorders.asp?order=PRODUCTIONSTART_DATE'>PROD DATE</TD>
-<TD><A href='workorders.asp?order=VIN'>VIN #</A> </TD>
+<TD><A href='workorders.asp?order=CUSTOMER<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>CUSTOMER</A> </TD> 
+<TD><A href='workorders.asp?order=ORDER_DATE<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>ORDER DATE</A> </TD> 
+<TD><A href='workorders.asp?order=REQ_DATE<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>REQ DATE</A> </TD> 
+<TD><A href='workorders.asp?order=PRODUCTIONSTART_DATE<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>PROD DATE</TD>
+<TD><A href='workorders.asp?order=VIN<%= iif (Request.QueryString("FILTER") <> "", "&FILTER=" & Request.QueryString("FILTER"), "") %>'>VIN #</A> <BR><INPUT type='textbox' size='11' name='vinsearch' id='vinsearch'><input type='button' value='S' name='vinsearchbutton' id='vinsearchbutton' onclick='onVINSearch()'> </TD>
+<%
+if szFilterParam =" = '4'" or szSortParam = "DELIVERED_DATE" then
+   response.write ("<TD> <A href='workorders.asp?order=DELIVERED_DATE'>DELV DATE</A> </TD>")
+end if
+%>
 </TR>
 
 <%
@@ -303,7 +324,7 @@ Do While Not objRs.EOF
    szTasks = szTasks & "<A href='javascript:FlipTask" & iWOLineCount & "()'>" & iTaskCompleteCount & " of " & iTaskCount &  "</A> "
    szOPtions = szOptions & "<A href='javascript:FlipOp" & iWOLineCount & "()'>" & iOptCompleteCount & " of " & iOptCount &  "</A> "
 
-   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> <A href='truck-detail.asp?vin=" & objRS("VIN") & "'>" & objRS("VIN") & "</td> </tr>")
+   response.write("<tr><td> " & objRS("STATUS_") & "</td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td><td id='tasks" & iWOLineCount & "'>" & szTasks & "</td><td id='options" & iWOLineCount & "'>" & szOptions & "</td><td> " & objRS("CUSTOMER") & " </td><td> " & objRS("ORDER_DATE") & " </td><td> " & objRS("REQ_DATE") & " </td><td> " & objRS("PRODUCTIONSTART_DATE") & "</td><td> <A href='truck-detail.asp?vin=" & objRS("VIN") & "'>" & objRS("VIN") & "</td>" & iif (szFilterParam = " = '4'" or szSortParam = "DELIVERED_DATE", "<TD>" & objRS("DELIVERED_DATE") & "</TD>", "") & " </tr>")
    objRS.MoveNext
    objPkgsRS.Close
    set objPkgsRS = Nothing

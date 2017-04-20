@@ -209,11 +209,11 @@ response.write ("<FORM name='wo-detail' id='wo-detail' action='truck-detail-upda
 <TD>VIN</TD> 
 <TD>CUSTOMER</TD> 
 <TD>WORKORDER #</TD> 
-<TD>MAKE</TD>
-<TD>MODEL</TD> 
-<TD>YEAR</TD> 
-<TD>CHASSIS WEIGHT</TD> 
-<TD>RECV DATE</TD> 
+<TD>ORDER DATE</TD>
+<TD></TD> 
+<TD>REQUEST DATE</TD> 
+<TD></TD> 
+<TD>DELIVERED DATE</TD> 
 </TR>
 
 <%
@@ -234,14 +234,36 @@ if szParamID <> "" then
    objRS.open szSQL, OBJdbConnection
 
    ' *************************************************************************************************
-   '	List row, close db
+   '	List row or search, close DB
    ' *************************************************************************************************
    'doesn't really have to be a loop - should never be > 1 truck with this VIN!
-   Do While Not objRs.EOF
+   if objRs.EOF then
+      ' *************************************************************************************************
+      '	For Search, change sql to like VIN and requery
+      ' *************************************************************************************************
+      'szSQL = "SELECT TRUCKS17.VIN, TRUCKS17.CUSTOMER, TRUCKS17.WO_NO, WO17.ORDER_DATE, WO17.REQ_DATE, WO17.PRODUCTIONSTART_DATE, TRUCKS17.RECV_DATE, WO17.DELIVERED_DATE FROM TRUCKS17 where VIN LIKE '%" & szParamID & "%'  LEFT JOIN WO17 ON TRUCKS17.VIN = WO17.VIN " 'ORDER BY WO17.DELIVERED_DATE
+      szSQL = "SELECT TRUCKS17.VIN, TRUCKS17.CUSTOMER, TRUCKS17.WO_NO, WO17.ORDER_DATE, WO17.REQ_DATE, WO17.DELIVERED_DATE FROM TRUCKS17 LEFT JOIN WO17 ON TRUCKS17.VIN = WO17.VIN WHERE TRUCKS17.VIN LIKE '%" & szParamID & "%' ORDER BY DELIVERED_DATE "
+      'response.write szSQL
+      objRs.Close
+      objRS.open szSQL, OBJdbConnection
+      Do While Not objRs.EOF
+         response.write("<tr><td> <A href='truck-detail.asp?vin=" & objRS("VIN") & "'>" & objRS("VIN") & "</td>  <td> " & objRS("CUSTOMER") & " </td><td> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td> <td> " & objRS("ORDER_DATE") & " </td><td> " & " " & " </td><td> " & objRS("REQ_DATE") & " </td> <td> " & "" & "</td> <td>" & objRS("DELIVERED_DATE") & "</td> </tr>") 
+         objRS.MoveNext
+      Loop
+      objRS.Close
+      set objRS = Nothing
+      set objRSStatus = Nothing
+      OBJdbConnection.close
+      set OBJdbConnection = nothing
+      'end page
+      response.write "</table> <div align='right'><input type='button' name='cancel' id='cancel' value='Cancel' onclick='onCancel();'> </div>"
+      response.write "</form> </body> </html>"
+      response.end
+   else
+      'FOR EXACT MATCH
+      response.write("<tr><td> <input type='hidden' id='vin_old' name='vin_old' value='" & objRS("VIN") & "'> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td> <td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'> <A href='workorder-detail.asp?id=" & objRS("WO_NO") & "'>" & objRS("WO_NO") & "</a> </td> <td> <input type='input' size='12' id='make' name='make' value='" & objRS("MAKE") & "'> </td><td> <input type='input' size='12' id='model' name='model' value='" & objRS("MOD_NO") & "'> </td><td> <input type='input' size='12' id='year' name='year' value='" & objRS("TRUCKYEAR") & "'> </td> <td><input type='input' size='12' id='chassisweight' name='chassisweight' value='" & objRS("CHASSISWEIGHT") & "'></td> <td><input type='input' size='12' id='recv_date' name='recv_date' value='" & objRS("RECV_DATE") & "'></td> </tr>") 
+   end if
 
-      response.write("<tr><td> <input type='hidden' id='vin_old' name='vin_old' value='" & objRS("VIN") & "'> <input type='input' id='vin' name='vin' value='" & objRS("VIN") & "'>  </td> <td> <input type='input' id='customer' name='customer' value='" & objRS("CUSTOMER") & "'> </td><td> <input type='input' size='12' id='wo_no' name='wo_no' value='" & objRS("WO_NO") & "'></td> <td> <input type='input' size='12' id='make' name='make' value='" & objRS("MAKE") & "'> </td><td> <input type='input' size='12' id='model' name='model' value='" & objRS("MOD_NO") & "'> </td><td> <input type='input' size='12' id='year' name='year' value='" & objRS("TRUCKYEAR") & "'> </td> <td><input type='input' size='12' id='chassisweight' name='chassisweight' value='" & objRS("CHASSISWEIGHT") & "'></td> <td><input type='input' size='12' id='recv_date' name='recv_date' value='" & objRS("RECV_DATE") & "'></td> </tr>") 
-      objRS.MoveNext
-   Loop
 
    objRS.Close
 

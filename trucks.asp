@@ -109,6 +109,14 @@ function myFunction(myMessage) {
 
 }
 
+function onVINSearch()
+{
+   var x = document.getElementById('vinsearch').value
+
+   window.location.href = 'truck-detail.asp?vin=' +x ;
+
+}
+
 
 function onNew()
 {
@@ -168,9 +176,9 @@ window.location='workorders.asp';
 
 <table width='100%' border='1' id='wolist'>
 <TR>
-<TD><A href='trucks.asp?order=TRUCKS17.VIN'>VIN #</A> </TD>
-<TD><A href='trucks.asp?order=TRUCKS17.CUSTOMER'>CUSTOMER</A> <BR><INPUT type='textbox' size='8' id='custsearch'><input type='button' value='S' id='custsearchbutton'></TD> 
-<TD><A href='trucks.asp?order=TRUCKS17.WO_NO'>WORK ORDER #<A> <BR><INPUT type='textbox' size='8' id='wosearch'><input type='button' value='S' id='wosearchbutton'></TD> 
+<TD><A href='trucks.asp?order=TRUCKS17.VIN'>VIN #</A> <BR><INPUT type='textbox' size='11' name='vinsearch' id='vinsearch'><input type='button' value='S' name='vinsearchbutton' id='vinsearchbutton' onclick='onVINSearch()'>  </TD>
+<TD><A href='trucks.asp?order=TRUCKS17.CUSTOMER'>CUSTOMER</A> </TD> 
+<TD><A href='trucks.asp?order=TRUCKS17.WO_NO'>WORK ORDER #<A> </TD> 
 <TD><A href='trucks.asp?order=ORDER_DATE'>ORDER DATE</A> </TD> 
 <TD><A href='trucks.asp?order=REQ_DATE'>REQ DATE</A> </TD> 
 <TD><A href='trucks.asp?order=PRODUCTIONSTART_DATE'>PROD DATE</TD>
